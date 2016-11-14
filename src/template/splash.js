@@ -10,6 +10,7 @@ import {
 
 import Home from './home';
 import Login from './login';
+import Register from './register';
 import Profile from './homes';
 import DataStore from '../stores/dataStore';
 import AccessToken from '../accessToken';
@@ -33,17 +34,45 @@ class Splash extends Component{
 		// 		sceneConfig : Navigator.SceneConfigs.FadeAndroid
 		// 	})	
 		// }, 1000)
-
+	// console.log('test')
 		AccessToken.get()
 			.then((data)=> {
 				if(data){
-					setTimeout(() => {
-						this.props.toRoute({
-							name : 'Home',
-							component : Home,
-							sceneConfig : Navigator.SceneConfigs.FadeAndroid
-						})	
-					}, 1000)
+
+					// setTimeout(() => {
+					// 			this.props.toRoute({
+					// 				name : 'Home',
+					// 				// component : Home,
+					// 				component : Register,
+					// 				sceneConfig : Navigator.SceneConfigs.FadeAndroid
+					// 			})	
+					// 		}, 1000)
+
+					AsyncStorage.getItem('USER_DATA').then((value) => {
+						// console.log(value)
+						var address = JSON.parse(value).AddressLine1
+						if(address==null || address==''){
+							console.log('belum isi form')
+							setTimeout(() => {
+								this.props.toRoute({
+									name : 'Home',
+									// component : Home,
+									component : Register,
+									sceneConfig : Navigator.SceneConfigs.FadeAndroid
+								})	
+							}, 1000)
+						}else{
+							setTimeout(() => {
+								this.props.toRoute({
+									name : 'Home',
+									component : Home,
+									// component : Register,
+									sceneConfig : Navigator.SceneConfigs.FadeAndroid
+								})	
+							}, 1000)
+						}
+					})
+					
 				}
 			})
 			.catch((err) => {
@@ -51,6 +80,7 @@ class Splash extends Component{
 					this.props.toRoute({
 						name : 'Home',
 						component : Login,
+						// component : Register,
 						sceneConfig : Navigator.SceneConfigs.FadeAndroid
 					})	
 				}, 1000)

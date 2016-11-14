@@ -65,7 +65,7 @@ class ApiRequest{
 
 	loadUser(email, access_token){
 		return new Promise((next, error) => {
-			return fetch(CONSTANT.API_URL+'customer/getbyemail?email='+email, {
+			return fetch(CONSTANT.API_URL+'customer/get', {
 				headers: {
 					'Authorization' : access_token
 				}
@@ -120,6 +120,30 @@ class ApiRequest{
 					// console.log('data ', data);
 				})
 				.catch((err) => console.log('error : ',err))
+		})
+	}
+
+	signup(data){
+		return new Promise((next, error) => {
+			return fetch(CONSTANT.API_URL+'customer/register', {
+				method : 'POST',
+				headers : {
+					'Content-Type' : 'application/json'
+				},
+				body : JSON.stringify({
+					EmailAddress : data.email,
+					LastName : data.lastname,
+					FirstName : data.firstname,
+					Password : data.password
+				})
+			})
+			.then((response) => {
+				return response.json()
+			})
+			.then((response) => {
+				next(response)
+			})
+			.catch((err) => console.log(err))
 		})
 	}
 }

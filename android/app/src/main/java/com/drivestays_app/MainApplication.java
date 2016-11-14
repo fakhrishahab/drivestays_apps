@@ -14,6 +14,8 @@ import com.facebook.react.shell.MainReactPackage;
 import com.BV.LinearGradient.LinearGradientPackage; // <-- add for linear gradient android
 import com.oblador.vectoricons.VectorIconsPackage;
 
+import com.imagepicker.ImagePickerPackage; // <-- add for image picker
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,7 +35,8 @@ public class MainApplication extends Application implements ReactApplication {
           new LinearGradientPackage(),
           new RNSvgPackage(),
           // new FabricPackage(),
-          new VectorIconsPackage()
+          new VectorIconsPackage(),
+          new ImagePickerPackage()
       );
     }
   };

@@ -64,7 +64,7 @@ class Menu extends Component{
 		AccessToken.getUser()
 			.then((data) => {
 				this.userData = JSON.parse(data)
-				let path = this.userData.CustomerPictures[0].Path;
+				let path = (this.userData.CustomerPictures.length >= 1) ? this.userData.CustomerPictures[0].Path : 'Assets/images/user-upload.png';
 				// console.log(this.userData)
 				this.setState({userImage : CONSTANT.API_URL+path});
 			})

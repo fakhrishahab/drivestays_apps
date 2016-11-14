@@ -86,7 +86,7 @@ class DetailSite extends Component{
 	}
 
 	componentWillMount(){
-		console.log(this.state.siteId, this.state.fromDate, this.state.toDate);
+		// console.log(this.state.siteId, this.state.fromDate, this.state.toDate);
 		PropertyAction.getProperty(this.state.siteId, this.state.fromDate, this.state.toDate);
 		PropertyAction.loadProperty.listen(this._onGetProperty.bind(this));
 	}
@@ -569,7 +569,7 @@ class DetailSite extends Component{
 			preloadBookInfo : true
 		})
 
-		var request = new Request('http://travellers.azurewebsites.net/api/properties/newdatesearch', {
+		var request = new Request(CONSTANT.API_URL+'properties/newdatesearch', {
 			method : 'POST',
 			headers : {
 				'Content-Type' : 'application/json',

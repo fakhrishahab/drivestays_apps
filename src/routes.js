@@ -32,8 +32,14 @@ var Routes = module.exports = {
 			case 'login' :
 				target = require('./template/login');
 				break;
+			case 'register' :
+			target = require('./template/register');
+				break;
 			case 'splash' :
 				target = require('./template/splash');
+				break;
+			case 'message' :
+				target = require('./template/message');
 				break;
 		}
 

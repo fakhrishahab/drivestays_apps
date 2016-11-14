@@ -9,7 +9,8 @@ import {
 	ScrollView,
 	TouchableOpacity,
 	Modal,
-	ActivityIndicator
+	ActivityIndicator,
+	Alert
 } from 'react-native';
 import AuthenticationAction from '../actions/authenticationAction';
 import styleVar from '../styleVar';
@@ -38,13 +39,15 @@ class Login extends Component{
 		this.email = 'fakhri1804@gmail.com';
 		this.password = '';
 		this.passwordConfirmation = '';
+		this.firstName = '';
+		this.lastName = '';
 	}
 
 	validateForm(){
     	var status;
 
     	if(!this.email){
-    		alert('Please your email')
+    		alert('Please input your email')
     		status = false;
     		return false;
     	}else{
@@ -53,6 +56,22 @@ class Login extends Component{
 
     	if(!this.password){
     		alert('Please input your password');
+    		status = false;
+    		return false;
+    	}else{
+    		status = true
+    	}
+
+    	if(this.state.isSignup && !this.firstName){
+    		alert('Please input your First Name');
+    		status = false;
+    		return false;
+    	}else{
+    		status = true
+    	}
+
+    	if(this.state.isSignup && !this.lastName){
+    		alert('Please input your Last Name');
     		status = false;
     		return false;
     	}else{
@@ -80,6 +99,7 @@ class Login extends Component{
 
 	componentDidMount() {
     	AuthenticationAction.loadUser.completed.listen(this.onLoadUserCompleted.bind(this));
+    	AuthenticationAction.login.failed.listen(this.onLoginCompleted.bind(this));
     	// console.log('here');
     	// ApiRequest.getProperty()
     	// 	.then((data) => {
@@ -88,9 +108,24 @@ class Login extends Component{
     	// 	.catch((err) => console.log('error : ', err))
 	}
 
-	onLoadUserCompleted(user){
-		if(user){
+	onLoginCompleted(data){
+		if(data.Status==401){
+			Alert.alert(
+				'Login Failed',
+				data.Message
+			)
+			this.setState({
+				loadingVisible : false
+			})
+		}
+		// console.log('login complete', data)
+	}
+
+	onLoadUserCompleted(user, data){
+		if(data.AddressLine1){
 			this.props.replaceRoute(Routes.link('home'));
+		}else{
+			this.props.replaceRoute(Routes.link('register'));
 		}
 		// if (user.onboarded) {
 		// 	this.props.replaceRoute(Routes.home());
@@ -135,6 +170,13 @@ class Login extends Component{
 		if(this.validateForm()){
 			this.setState({
 				loadingVisible : true
+			})
+
+			AuthenticationAction.signup({
+				email : this.email,
+				password : this.password,
+				firstname : this.firstName,
+				lastname : this.lastName
 			})
 		}
 		// console.log(this.validateForm());
@@ -184,6 +226,44 @@ class Login extends Component{
 			</View>
 		) : null;
 
+		let firstnameComponent = (this.state.isSignup) ? (
+			<View style={styles.inputWrapper}>
+				<ScrollView style={styles.inputText}
+		      		showsVerticalScrollIndicator={false}>
+			        <TextField
+						label={'First Name'}
+						highlightColor={styleVar.colors.secondary}
+						onChangeText={(text) => this.firstName = text}
+						keyboardType={'default'}
+						ref="firstName"
+						textColor='#FFF'
+						labelColor='#FFF'
+						dense={true}
+						value={this.firstName}
+			        />
+		      	</ScrollView>
+			</View>
+		) : null;
+
+		let lastnameComponent = (this.state.isSignup) ? (
+			<View style={styles.inputWrapper}>
+				<ScrollView style={styles.inputText}
+		      		showsVerticalScrollIndicator={false}>
+			        <TextField
+						label={'Last Name'}
+						highlightColor={styleVar.colors.secondary}
+						onChangeText={(text) => this.lastName = text}
+						keyboardType={'default'}
+						ref="lastName"
+						textColor='#FFF'
+						labelColor='#FFF'
+						dense={true}
+						value={this.lastName}
+			        />
+		      	</ScrollView>
+			</View>
+		) : null;
+
 		return(
 			<View style={styles.containerHome}>
 				<ScrollView
@@ -211,6 +291,9 @@ class Login extends Component{
 						        />
 					      	</ScrollView>
 						</View>
+
+						{firstnameComponent}
+						{lastnameComponent}
 
 						<View style={styles.inputWrapper}>
 							<ScrollView style={styles.inputText}

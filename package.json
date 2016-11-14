@@ -18,6 +18,7 @@
     "react-native-gifted-form": "0.0.13",
     "react-native-google-location": "^0.2.0",
     "react-native-google-places-autocomplete": "^1.2.2",
+    "react-native-image-picker": "^0.23.0",
     "react-native-linear-gradient": "^1.5.12",
     "react-native-maps": "^0.7.1",
     "react-native-material-design": "^0.3.7",

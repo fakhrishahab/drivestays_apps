@@ -25,7 +25,7 @@ class AccessToken {
 		AsyncStorage.getItem('ACCESS_TOKEN')
 				.then((token) => {
 					if(token){
-						console.log('access_token', token)
+						// console.log('access_token', token)
 						return token;
 					}else{
 						error();

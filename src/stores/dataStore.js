@@ -25,10 +25,15 @@ export default Reflux.createStore({
 	onLogin : function(data){
 		ApiRequest.login(data)
 			.then((authData) => {
-				AccessToken.set(authData.Auth_Token)
-					.then(() => {
-						AuthenticationAction.login.completed(authData.Data.EmailAddress, authData.Auth_Token)
-					})
+				if(authData.Status == 401){
+					AuthenticationAction.login.failed(authData)
+				}else{
+					// console.log('login success', authData)
+					AccessToken.set(authData.Auth_Token)
+						.then(() => {
+							AuthenticationAction.login.completed(authData.Data.EmailAddress, authData.Auth_Token)
+						})
+				}
 			})
 			.catch((err) => AuthenticationAction.login.failed(err))
 	},
@@ -38,8 +43,8 @@ export default Reflux.createStore({
 	},
 
 	onLoginFailed : function(error){
-		console.error("Login failed with error ", error.message);
-	},
+		console.log("Login failed with error ", error.Message);
+	},	
 
 	onSignup : function(data){
 		ApiRequest.signup(data)
@@ -48,6 +53,7 @@ export default Reflux.createStore({
 	},
 
 	onSignupCompleted : function(data, user){
+		// console.log('register data', data)
 		AuthenticationAction.login(data)
 	},
 
@@ -56,7 +62,6 @@ export default Reflux.createStore({
 	},
 
 	onLoadUser : function(email, access_token){
-
 		ApiRequest.loadUser(email, access_token)
 			.then((user) => {
 				AccessToken.setUser(user.Data)
@@ -71,9 +76,20 @@ export default Reflux.createStore({
 		this.setCurrentUser(uid, user);
 	},
 
+	onUpdateUser : function(data){
+		ApiRequest.loadUser(data.email, data.access_token)
+			.then((user) => {
+				AccessToken.setUser(user.Data)
+					.then(() => {
+						AuthenticationAction.loadUser.completed(user.Data.ID, user.Data)
+					})
+			})
+			.catch((err) => AuthenticationAction.loadUser.failed(err));
+	},
+
 	onLoadUserFailed : function(error) {
 		console.error("loading user failed with error ", error.message);
-	},
+	},	
 
 	onLogout : function(){
 		AccessToken.clear();
