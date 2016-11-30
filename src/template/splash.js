@@ -11,7 +11,7 @@ import {
 import Home from './home';
 import Login from './login';
 import Register from './register';
-import Profile from './homes';
+import Notification from './myCaravan';
 import DataStore from '../stores/dataStore';
 import AccessToken from '../accessToken';
 
@@ -39,7 +39,21 @@ class Splash extends Component{
 			.then((data)=> {
 				if(data){
 
-					// setTimeout(() => {
+					setTimeout(() => {
+								this.props.toRoute({
+									name : 'Home',
+									// component : Home,
+									component : Notification,
+									sceneConfig : Navigator.SceneConfigs.FadeAndroid
+								})	
+							}, 1000)
+
+					// AsyncStorage.getItem('USER_DATA').then((value) => {
+					// 	// console.log(value)
+					// 	var address = JSON.parse(value).AddressLine1
+					// 	if(address==null || address==''){
+					// 		console.log('belum isi form')
+					// 		setTimeout(() => {
 					// 			this.props.toRoute({
 					// 				name : 'Home',
 					// 				// component : Home,
@@ -47,31 +61,17 @@ class Splash extends Component{
 					// 				sceneConfig : Navigator.SceneConfigs.FadeAndroid
 					// 			})	
 					// 		}, 1000)
-
-					AsyncStorage.getItem('USER_DATA').then((value) => {
-						// console.log(value)
-						var address = JSON.parse(value).AddressLine1
-						if(address==null || address==''){
-							console.log('belum isi form')
-							setTimeout(() => {
-								this.props.toRoute({
-									name : 'Home',
-									// component : Home,
-									component : Register,
-									sceneConfig : Navigator.SceneConfigs.FadeAndroid
-								})	
-							}, 1000)
-						}else{
-							setTimeout(() => {
-								this.props.toRoute({
-									name : 'Home',
-									component : Home,
-									// component : Register,
-									sceneConfig : Navigator.SceneConfigs.FadeAndroid
-								})	
-							}, 1000)
-						}
-					})
+					// 	}else{
+					// 		setTimeout(() => {
+					// 			this.props.toRoute({
+					// 				name : 'Home',
+					// 				component : Home,
+					// 				// component : Register,
+					// 				sceneConfig : Navigator.SceneConfigs.FadeAndroid
+					// 			})	
+					// 		}, 1000)
+					// 	}
+					// })
 					
 				}
 			})

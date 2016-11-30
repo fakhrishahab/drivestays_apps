@@ -16,19 +16,20 @@ import CONSTANT from '../constantVar';
 let listMenu = [
 	commonMenu = [
 		{id : 0, title : 'Home', target : 'home', icon : require('image!icon_02')},
-		{id : 1, title : 'About Us', target : 'aboutUs', icon : require('image!icon_02')},
-		{id : 2, title : 'Terms & Agreement', target : 'termsAgreement', icon : require('image!icon_02')}
+		// {id : 1, title : 'About Us', target : 'aboutUs', icon : require('image!icon_02')},
+		// {id : 2, title : 'Terms & Agreement', target : 'termsAgreement', icon : require('image!icon_02')}
 	],
 	userMenu = [
 		{id : 3, title : 'My Profile', target : 'myProfile', icon : require('image!icon_04')},
         {id : 4, title : 'My Caravan', target : 'myCaravan', icon : require('image!icon_11')},
         {id : 5, title : 'My Site', target : 'mySite', icon : require('image!icon_13')},
-        {id : 6, title : 'Transaction List', target : 'transactionList', icon : require('image!icon_34')},
-        {id : 7, title : 'Account Payment', target : 'accountPayment', icon : require('image!icon_12')},
+        {id : 6, title : 'My Booking', target : 'myBooking', icon : require('image!icon_34')},
+        {id : 7, title : 'Stay Request', target : 'stayRequest', icon : require('image!icon_34')},
+        {id : 8, title : 'Account Payment', target : 'accountPayment', icon : require('image!icon_12')},
 	],
 	settingMenu = [
-        {id : 8, title : 'Account Setting', target : 'accountSetting', icon : require('image!icon_03')},
-        {id : 9, title : 'Configuration', target : 'configuration', icon : require('image!icon_03')},
+        {id : 9, title : 'Account Setting', target : 'accountSetting', icon : require('image!icon_03')},
+        // {id : 10, title : 'Configuration', target : 'configuration', icon : require('image!icon_03')},
         // {id : 10, title : 'Log Out', target : 'logout', icon : require('image!icon_05')},
 	]
 ];
@@ -48,10 +49,11 @@ class Menu extends Component{
 	      	{id : 1, title : 'My Profile', target : 'myProfile'},
 	        {id : 2, title : 'My Caravan', target : 'myCaravan'},
 	        {id : 3, title : 'My Site', target : 'mySite'},
-	        {id : 4, title : 'Transaction List', target : 'transactionList'},
-	        {id : 5, title : 'Account Setting', target : 'accountSetting'},
-	        {id : 6, title : 'Account Payment', target : 'accountPayment'},
-	        {id : 7, title : 'Configuration', target : 'configuration'},
+	        {id : 4, title : 'My Booking', target : 'myBooking'},
+	        {id : 5, title : 'Stay Request', target : 'stayRequest'},
+	        {id : 6, title : 'Account Setting', target : 'accountSetting'},
+	        {id : 7, title : 'Account Payment', target : 'accountPayment'},
+	        {id : 8, title : 'Configuration', target : 'configuration'},
 	        {id : 9, title : 'Splash Screen', target : 'splash'}
 	      ])
 	    };

@@ -55,7 +55,7 @@ class MySite extends Component{
 		      drawerPosition={DrawerLayout.positions.Left}
 		      renderNavigationView={() => menu}>
 				<View style={styles.containerHome}>
-			    	<HeaderContent onPress={() => this.toggle()}/>
+			    	<HeaderContent onPress={() => this.toggle()} title="My Site" icon="search"/>
 			    	<View style={styles.containerContent}>
 						<Text>This is My Site Page</Text>
 			    	</View>

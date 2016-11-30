@@ -45,6 +45,13 @@ class HeaderContent extends Component{
 			<View style={styles.appContainer}>
 				<View style={styles.flatHeader}>
 			        <Icon name="menu" size={30} color="#FFF" onPress={this.handlePress.bind(this)} />
+			        <Text style={styles.headerTitle}>{this.props.title}</Text>
+			        { (this.props.icon) ?
+			        	<Icon name={this.props.icon} size={30} color="#FFF" onPress={this.handlePress.bind(this)} />
+			        	:
+			        	<Icon name='search' size={30} color={styleVar.colors.primary}/>
+			        }
+			        
 			    </View>
 			</View>
 		)
@@ -75,6 +82,14 @@ const styles = StyleSheet.create({
 		width : 40,
 		height : 40,
 		right: 0
+	},
+	headerTitle : {
+		color: '#FFF',
+		fontFamily : 'gothic',
+		fontSize : 16,
+		textShadowColor : '#000',
+		textShadowOffset : {width : 1, height: 1},
+		textShadowRadius : 7
 	}
 })
 

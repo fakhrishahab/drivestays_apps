@@ -17,7 +17,7 @@ import MapView from 'react-native-maps';
 import SideMenu from 'react-native-side-menu';
 import Menu from '../component/menu';
 import HeaderContent from '../component/headerContent';
-import styles from '../style/messageStyle';
+import styles from '../style/notificationStyle';
 import Routes from '../routes';
 import DrawerLayout from 'react-native-drawer-layout';
 import styleVar from '../styleVar';
@@ -30,7 +30,7 @@ const propTypes = {
 
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
-class Message extends Component{
+class Notification extends Component{
 
 	constructor(props) {
 		super(props);
@@ -92,7 +92,7 @@ class Message extends Component{
     	this.setState({
     		loadStatus : true
     	})
-    	var request = new Request(CONSTANT.API_URL+'messages/get?offset='+this.state.viewedMessage+'&limit='+this.state.limit, {
+    	var request = new Request(CONSTANT.API_URL+'messagethreads/notification?offset='+this.state.viewedMessage+'&limit='+this.state.limit, {
     		method : 'GET',
     		headers : {
     			'Content-Type' : 'application/json',
@@ -108,10 +108,10 @@ class Message extends Component{
     			// console.log(response);
     			this.setState({
     				preloadShow : false,
-    				messageData : response.Data.MessageViews,
-    				dataSource : this.state.dataSource.cloneWithRows(this.state.messageData.concat(response.Data.MessageViews)),
-    				totalMessage : response.Data.Length,
-    				viewedMessage : parseInt(this.state.viewedMessage + response.Data.MessageViews.length),
+    				messageData : response.Data.MessageThreads,
+    				dataSource : this.state.dataSource.cloneWithRows(this.state.messageData.concat(response.Data.MessageThreads)),
+    				totalMessage : response.Data.Total,
+    				viewedMessage : parseInt(this.state.viewedMessage + response.Data.MessageThreads.length),
     				loadMoreShow : true,
 		  			loadStatus : false
     			})
@@ -177,23 +177,6 @@ class Message extends Component{
 		}
 	}
 
-	messageClick(param){
-    	var sceneConfig = Navigator.SceneConfigs.FloatFromRight;
-    	sceneConfig.gestures.pop.disabled = true;
-    	// console.log(param)
-    	this.props.toRoute({
-			name : 'messageThread',
-			component : require('./messageThread'),
-			data : {
-				MessageID : param.ID,
-				CustomerFirstName : param.CustomerFirstName,
-				CustomerImage : param.CustomerImage
-			},
-    		sceneConfig : sceneConfig
-		})  
-    	console.log('test')
-    }
-
 	renderMessageList(){
     	return(
     		<ListView
@@ -201,23 +184,7 @@ class Message extends Component{
 	          	enableEmptySections={true}
 	          	renderRow={(rowData) => 
 		    		<TouchableHighlight underlayColor={styleVar.colors.greySecondary} onPress={() => this.messageClick(rowData)}>
-		    				{
-		    					//this.viewList(rowData)
-		    				}
-
-		    				<View style={[styles.listWrapper, {backgroundColor : '#FFF'}]}>
-		    					{
-		    						(rowData.CustomerImage == null) ?
-		    						<Image source={require('image!user_upload')} style={styles.notifImage}/>
-		    						:
-		    						<Image source={{uri : CONSTANT.WEB_URL+rowData.CustomerImage}} style={styles.notifImage}/>
-		    					}
-								
-								<View style={styles.listDesc}>
-									<Text style={styles.textFrom}>{rowData.CustomerFirstName}</Text> 
-									<Text style={styles.textMessage}>{this._limitWords(rowData.LatestText, 7)}</Text>
-								</View>
-							</View>
+		    				{this.viewList(rowData)}
 						
 					</TouchableHighlight>}/>
     	)
@@ -241,6 +208,24 @@ class Message extends Component{
         } else {
             return text;
         }
+    }
+
+    messageClick(param){
+    	console.log(param)
+
+    	var sceneConfig = Navigator.SceneConfigs.FloatFromRight;
+    	sceneConfig.gestures.pop.disabled = true;
+    	// console.log(param)
+    	this.props.toRoute({
+			name : 'messageThread',
+			component : require('./messageThread'),
+			data : {
+				MessageID : param.MessageID,
+				CustomerFirstName : param.FromUser,
+				CustomerImage : param.UserImagePath
+			},
+    		sceneConfig : sceneConfig
+		})  
     }
 
     loadMore(){
@@ -287,7 +272,7 @@ class Message extends Component{
 		      drawerPosition={DrawerLayout.positions.Left}
 		      renderNavigationView={() => menu}>
 				<View style={styles.containerHome}>
-			    	<HeaderContent onPress={() => this.toggle()} title="Message" icon="search"/>
+			    	<HeaderContent onPress={() => this.toggle()} title="Notification" icon="search"/>
 			    	<View style={styles.containerContent}>
 						<ScrollView
 	      					onScroll={this.handleScroll.bind(this)}>
@@ -302,4 +287,4 @@ class Message extends Component{
 	}
 }
 
-module.exports = Message;
+module.exports = Notification;

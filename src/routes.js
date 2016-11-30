@@ -17,8 +17,11 @@ var Routes = module.exports = {
 			case 'mySite' :
 				target = require('./template/mySite');
 				break;
-			case 'transactionList' :
-				target = require('./template/transactionList');
+			case 'myBooking' :
+				target = require('./template/myBooking');
+				break;
+			case 'stayRequest' :
+				target = require('./template/stayRequest');
 				break;
 			case 'accountSetting' :
 				target = require('./template/accountSetting');
@@ -38,8 +41,14 @@ var Routes = module.exports = {
 			case 'splash' :
 				target = require('./template/splash');
 				break;
+			case 'notification' :
+				target = require('./template/notification');
+				break;
 			case 'message' :
 				target = require('./template/message');
+				break;
+			case 'messageThread' :
+				target = require('./template/messageThread');
 				break;
 		}
 

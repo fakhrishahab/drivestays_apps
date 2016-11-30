@@ -37,6 +37,9 @@ module.exports = {
 			fontSize : 10	
 		}
 	},
+	fontGothic : {
+		fontFamily : 'gothic'
+	},
 	bold : {
 		fontFamily : 'gothic-bold',
 		fontWeight : 'bold'

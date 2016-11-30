@@ -24,7 +24,8 @@ class Header extends Component{
 		super(props);
 	
 	  	this.state = {
-	  		access_token : ''
+	  		access_token : '',
+	  		notifMessage : false
 	  	};
 	}
 
@@ -63,6 +64,11 @@ class Header extends Component{
 				return response.json()
 			})
 			.then((response) => {
+				if(response.Data.Total >= 1){
+					this.setState({
+						notifMessage : true
+					})
+				}
 				console.log(response)
 			})
 			.catch((err) => {
@@ -85,6 +91,22 @@ class Header extends Component{
 		// })
 	}
 
+	_viewMessage(e){
+		if(this.props.onTeken){
+			this.props.onTeken(e)
+		}
+	}
+
+	notificationBullet(status){
+		if(status){
+			return(
+				<View style={styles.notificationBullet}></View>
+			)
+		}else{
+			return(null)
+		}
+	}
+
 	render(){
 		return(
 			<LinearGradient 
@@ -93,9 +115,12 @@ class Header extends Component{
 		        style={styles.linearGradient}
 		      >
 		        <Icon name="menu" size={25} color="#fff" onPress={this.handlePress.bind(this)} />
-		        <Icon name="notifications-none" size={25} color="#fff" onPress={() => this._viewNotif(this)}/>
-			        <View style={styles.notificationBullet}>
-			        </View>
+		        <View style={{flexDirection:'row'}}>
+		        	<Icon name="mail-outline" size={25} color="#fff" onPress={() => this._viewMessage(this)} style={{marginRight:20}}/>
+		        	<Icon name="notifications-none" size={25} color="#fff" onPress={() => this._viewNotif(this)}/>
+		        	{this.notificationBullet(this.state.notifMessage)}
+		        </View>
+		        
 		    </LinearGradient>
 		)
 	}
@@ -106,8 +131,8 @@ const styles = StyleSheet.create({
 		position : 'absolute',
 		width : 10,
 		height : 10,
-		top : 25,
-		right : 20,
+		top : 0,
+		right : 0,
 		backgroundColor : styleVar.colors.secondary,
 		borderRadius : 5
 	},	

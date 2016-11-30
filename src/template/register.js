@@ -182,7 +182,7 @@ class Register extends Component{
     		})
 
     	// console.log(data)
-    	var request = new Request('http://travellers.azurewebsites.net/api/customer/update', {
+    	var request = new Request(CONSTANT.API_URL+'customer/update', {
     		method : 'POST',
     		headers : {
     			'Accept': 'application/json',

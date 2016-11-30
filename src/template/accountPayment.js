@@ -55,7 +55,7 @@ class AccountPayment extends Component{
 		      drawerPosition={DrawerLayout.positions.Left}
 		      renderNavigationView={() => menu}>
 				<View style={styles.containerHome}>
-			    	<HeaderContent onPress={() => this.toggle()}/>
+			    	<HeaderContent onPress={() => this.toggle()} title="Account Payment" icon="search"/>
 			    	<View style={styles.containerContent}>
 						<Text>This is Account Payment Page</Text>
 			    	</View>

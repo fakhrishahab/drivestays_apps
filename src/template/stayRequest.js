@@ -16,12 +16,13 @@ import HeaderContent from '../component/headerContent';
 import Routes from '../routes';
 import DrawerLayout from 'react-native-drawer-layout';
 import AccessToken from '../accessToken';
+import styles from '../style/stayRequest';
 
 const propTypes = {
   toRoute: PropTypes.func.isRequired
 }
 
-class TransactionList extends Component{
+class StayRequest extends Component{
 
 	constructor(props) {
 	  super(props);
@@ -55,9 +56,9 @@ class TransactionList extends Component{
 		      drawerPosition={DrawerLayout.positions.Left}
 		      renderNavigationView={() => menu}>
 				<View style={styles.containerHome}>
-			    	<HeaderContent onPress={() => this.toggle()}/>
+			    	<HeaderContent onPress={() => this.toggle()} title="Stay Request" icon="search"/>
 			    	<View style={styles.containerContent}>
-						<Text>This is Transaction List Page</Text>
+						<Text>This is My Caravan Page</Text>
 			    	</View>
 			    </View>
 			</DrawerLayout>
@@ -65,16 +66,4 @@ class TransactionList extends Component{
 	}
 }
 
-const styles = StyleSheet.create({
-	containerHome : {
-		flex: 1,
-		zIndex : 0,
-		backgroundColor : '#FFFFFF'
-	},
-	containerContent : {
-		flex : 1,
-		backgroundColor : '#CCC'
-	}
-})
-
-module.exports = TransactionList;
+module.exports = StayRequest;

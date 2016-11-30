@@ -52,9 +52,9 @@ class Home extends Component{
         });
     }
 
-    showMessage(type){
+    showNotif(type){
     	console.log('test')
-    	this.props.replaceRoute(Routes.link('message'));
+    	this.props.replaceRoute(Routes.link('notification'));
 		// var sceneConfig = Navigator.SceneConfigs.FloatFromBottom;
 	 //    	sceneConfig.gestures.pop.disabled = true;
 
@@ -176,6 +176,9 @@ class Home extends Component{
     	this.props.replaceRoute(Routes.link('login'));
     }
 
+    showMessage(){
+    	this.props.replaceRoute(Routes.link('message'));
+    }
     
 	render(){
 		const menu = <Menu nextPage={this.onNextPage} logout={this._onLogout}/>;
@@ -187,7 +190,7 @@ class Home extends Component{
 		      drawerPosition={DrawerLayout.positions.Left}
 		      renderNavigationView={() => menu}>
 				<View style={styles.containerHome}>
-					<Header onPress={() => this.toggle()} onClick={() => this.showMessage()}/>
+					<Header onPress={() => this.toggle()} onClick={() => this.showNotif()} onTeken={ () => this.showMessage()}/>
 					<MapView
 						ref="map"
 						style={[styles.map]}
