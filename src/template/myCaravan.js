@@ -11,7 +11,9 @@ import {
   InteractionManager,
   ActivityIndicator,
   AsyncStorage,
-  Alert
+  Alert,
+  Modal,
+  Navigator
 } from 'react-native';
 import MapView from 'react-native-maps';
 import SideMenu from 'react-native-side-menu';
@@ -26,6 +28,7 @@ import styleVar from '../styleVar';
 import CONSTANT from '../constantVar';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import _ from 'underscore';
+import CaravanForm from './caravanForm';
 
 const propTypes = {
   toRoute: PropTypes.func.isRequired
@@ -33,6 +36,7 @@ const propTypes = {
 
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 let dataVehicleArr = [];
+
 class MyCaravan extends Component{
 
 	constructor(props) {
@@ -44,7 +48,8 @@ class MyCaravan extends Component{
 	  		dataSource : ds.cloneWithRows([]),
 	  		vehicleData : [],
 	  		preloadShow : true,
-	  		totalVehicle : 0
+	  		totalVehicle : 0,
+	  		modalVisible : false
 	  	};
 
 	  	this.onNextPage = this.onNextPage.bind(this);
@@ -94,7 +99,7 @@ class MyCaravan extends Component{
     			return response.json();
     		})
     		.then((response) => {
-    			console.log(response);
+    			// console.log(response);
 
     			response.Data.map((key) => {
     				dataVehicleArr.push(key)
@@ -184,7 +189,7 @@ class MyCaravan extends Component{
 				return response.json();
 			})
 			.then((response) => {
-				console.log(response)
+				// console.log(response)
 
 				this.setState({
 					dataSource : this.state.dataSource.cloneWithRows(_.sortBy(dataVehicleArr, 'ID'))
@@ -198,7 +203,7 @@ class MyCaravan extends Component{
 
 	renderCaravanList(data){
 		return(
-			<TouchableHighlight>
+			<TouchableHighlight onPress={ () => this.openCaravanForm(data)}>
 				<View style={styles.requestItemWrapper}>
 					{
 						(data.VehiclePictures.length >= 1) ?
@@ -225,6 +230,28 @@ class MyCaravan extends Component{
 		)
 	}
 
+	openCaravanForm(data){
+		var sceneConfig = Navigator.SceneConfigs.FloatFromRight;
+    	sceneConfig.gestures.pop.disabled = true;
+
+    	if(data){
+    		var dataVehicle = {
+    			vehicleID : data.ID
+    		}
+    	}else{
+    		dataVehicle = {
+    			vehicleID : null
+    		}
+    	}
+
+		this.props.toRoute({
+			name : 'caravan form',
+			component : require('./caravanForm'),
+			data : dataVehicle,
+    		sceneConfig : sceneConfig
+		})
+	}
+
 	render(){
     	const menu = <Menu nextPage={this.onNextPage} logout={this._onLogout}/>;
 
@@ -239,13 +266,13 @@ class MyCaravan extends Component{
 		      drawerPosition={DrawerLayout.positions.Left}
 		      renderNavigationView={() => menu}>
 				<View style={styles.containerHome}>
-			    	<HeaderContent onPress={() => this.toggle()} title="My Caravan" icon="add"/>
+			    	<HeaderContent onPress={() => this.toggle()} title="My Caravan" icon="add" onClick={() => this.openCaravanForm()}/>
 
 			    	<ScrollView style={{backgroundColor : styleVar.colors.greySecondary}}>
 			    		{this._renderCaravanList()}
 			    		
 			    	</ScrollView>
-			    	
+			    			  
 			    </View>
 			</DrawerLayout>
 		)

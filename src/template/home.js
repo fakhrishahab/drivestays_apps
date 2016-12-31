@@ -177,7 +177,7 @@ class Home extends Component{
     }
 
     showMessage(){
-    	this.props.replaceRoute(Routes.link('message'));
+    	this.props.toRoute(Routes.link('message'));
     }
     
 	render(){

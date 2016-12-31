@@ -53,12 +53,14 @@ var Routes = module.exports = {
 		}
 
 		var sceneConfig = Navigator.SceneConfigs.FloatFromBottom;
-		sceneConfig.gestures.pop.disabled = true;
+		// sceneConfig.gestures.pop.disabled = true;
+		sceneConfig.gestures = true;
 
 		return {
     		name : 'menu',
     		component: target,
-    		sceneConfig: sceneConfig
+    		sceneConfig: sceneConfig,
+    		// gestures : false
     	}
 	}
 }

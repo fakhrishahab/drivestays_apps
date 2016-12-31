@@ -25,6 +25,12 @@ class HeaderContent extends Component{
 	    }
 	}
 
+	handleClick(e){
+		if(this.props.onClick){
+			this.props.onClick(e);
+		}
+	}
+
 	componentWillMount(){
 		AsyncStorage.getItem("USER_DATA").then((value) => {
         	this.setState({user_data : JSON.parse(value)})
@@ -47,7 +53,7 @@ class HeaderContent extends Component{
 			        <Icon name="menu" size={30} color="#FFF" onPress={this.handlePress.bind(this)} />
 			        <Text style={styles.headerTitle}>{this.props.title}</Text>
 			        { (this.props.icon) ?
-			        	<Icon name={this.props.icon} size={30} color="#FFF" onPress={this.handlePress.bind(this)} />
+			        	<Icon name={this.props.icon} size={30} color="#FFF" onPress={this.handleClick.bind(this)} />
 			        	:
 			        	<Icon name='search' size={30} color={styleVar.colors.primary}/>
 			        }
