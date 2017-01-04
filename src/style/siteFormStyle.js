@@ -13,8 +13,8 @@ module.exports = {
 		// flex : 1,
 		// backgroundColor : styleVar.colors.greySecondary,
 		// backgroundColor : '#FFFFFF',
-		paddingHorizontal: 10,
-		paddingVertical : -5
+		padding: 10,
+		// paddingVertical : -5
 	},
 	headerModal : {
 		flexDirection: 'row',
@@ -41,7 +41,8 @@ module.exports = {
 	inputText : {
 		flex : 1,
 		paddingLeft : 0,
-		paddingVertical : -5
+		paddingVertical : -5,
+		height : 55
 	},
 	inputSwitchWrapper : {
 		flex : 1,
@@ -53,8 +54,7 @@ module.exports = {
 		flexDirection : 'row',
 		alignItems : 'flex-start',
 		justifyContent : 'space-between',
-		alignItems : 'center',
-		paddingVertical : 5,
+		alignItems : 'center',	
 	},
 	uploadContainer : {
 		backgroundColor : styleVar.colors.greySecondary,
@@ -98,7 +98,7 @@ module.exports = {
 		right : 0,
 		padding : 15,
 		borderRadius : 5,
-		marginBottom : 15,
+		marginVertical : 15,
 		alignItems : 'center',
 		backgroundColor : styleVar.colors.primary
 	},
@@ -132,5 +132,37 @@ module.exports = {
 		right:0,
 		bottom:0,
 		height : screenWidth
+	},
+	scrollbarView : {
+		backgroundColor : '#FFFFFF'
+	},
+	scrollbarWrapper : {
+		backgroundColor : styleVar.colors.greySecondary,
+	},
+	inputGroupHorizontal : {
+		flexDirection : 'row',
+		justifyContent : 'space-around'
+	},
+	inputGroupLong : {
+		flex : 2,
+		paddingLeft : 0,
+		paddingVertical : -5,
+		height : 55
+	},
+	inputGroupMiddle : {
+		flex : 1,
+		paddingLeft : 0,
+		paddingVertical : -5,
+		height : 55,
+	},
+	inputGroupSeparator : {
+		marginLeft : 5
+	},
+	inputGroupButton : {
+		height : 55,
+		width: 35,
+		// backgroundColor : styleVar.colors.greySecondary,
+		alignItems : 'center',
+		justifyContent : 'center'
 	}
 }

@@ -97,7 +97,7 @@ class MySite extends Component{
     			return response.json()
     		})
     		.then((response) => {
-    			console.log(response)
+    			// console.log(response)
     			response.Data.map((key) => {
     				dataSiteArr.push(key)
     			});
@@ -183,8 +183,28 @@ class MySite extends Component{
 		)
 	}
 
-	openSiteForm(){
+	openSiteForm(data){
 
+		var sceneConfig = Navigator.SceneConfigs.FloatFromRight;
+    	sceneConfig.gestures.pop.disabled = true;
+
+    	if(data){
+    		var dataSite = {
+    			siteID : data.ID,
+    			latitude : data.Latitude,
+    			longitude : data.Longitude
+    		}
+    	}else{
+    		dataSite = {}
+    	}
+
+    	// console.log(dataSite)
+    	this.props.toRoute({
+    		name : 'site form',
+    		component : require('./siteForm'),
+    		data : dataSite,
+    		sceneConfig : sceneConfig
+    	})
 	}
 
 	setDefault(){
@@ -209,7 +229,8 @@ class MySite extends Component{
 		      drawerPosition={DrawerLayout.positions.Left}
 		      renderNavigationView={() => menu}>
 				<View style={styles.containerHome}>
-			    	<HeaderContent onPress={() => this.toggle()} title="My Site" icon="search"/>
+			    	<HeaderContent onPress={() => this.toggle()} title="My Site" icon="add"
+			    		onClick={() => this.openSiteForm()}/>
 			    	<ScrollView style={{backgroundColor : styleVar.colors.greySecondary}}>
 			    		{this._renderSiteList()}
 			    		

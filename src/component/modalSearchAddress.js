@@ -18,9 +18,11 @@ class ModalSearchAddress extends Component{
 	}
 
 	placeChanged(details){
+		// console.log(details)
 		this.setState({
 			placeAddress : details.formatted_address,
-			placeGeometry : details.geometry
+			placeGeometry : details.geometry,
+			placeDetails : details
 		})
 	}
 
@@ -48,10 +50,10 @@ class ModalSearchAddress extends Component{
 						fetchDetails={true}
 						onPress={(data, details=null) =>{
 							this.placeChanged(details)
-							console.log(details)
+							console.log(data)
 						}}
 						onChange={(e) => {
-							console.log(e)
+							// console.log(e)
 							this.setState({
 								placeValue : e.target.value
 							})
@@ -79,7 +81,7 @@ class ModalSearchAddress extends Component{
 						GooglePlacesSearchQuery={{
 							rankby: 'keyword'
 						}}
-						filterReverseGeocodingByTypes={['locality', 'postal_code']}
+						filterReverseGeocodingByTypes={['locality', 'postal_code', 'street_address']}
 					/>
 				</View>
 				
