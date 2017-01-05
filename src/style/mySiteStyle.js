@@ -42,10 +42,11 @@ module.exports = {
 		flex: 1,
 		flexDirection : 'row',
 		justifyContent : 'space-between',
-		alignItems : 'center'
+		alignItems : 'center',
+		width : screenWidth
 	},
 	requestDescText : {
-
+		flex : 1
 	},
 	requestDescBrand : {
 		color : styleVar.colors.secondary,

@@ -13,7 +13,8 @@ import {
   AsyncStorage,
   Alert,
   Modal,
-  Navigator
+  Navigator,
+  Dimensions
 } from 'react-native';
 import MapView from 'react-native-maps';
 import SideMenu from 'react-native-side-menu';
@@ -32,8 +33,9 @@ import _ from 'underscore';
 const propTypes = {
   toRoute: PropTypes.func.isRequired
 }
-
+let screenWidth = Dimensions.get('window').width;
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+
 let dataSiteArr = [];
 
 class MySite extends Component{
@@ -48,7 +50,8 @@ class MySite extends Component{
 	  		siteData : [],
 	  		preloadShow : true,
 	  		totalSite : 0,
-	  		modalVisible : false
+	  		modalVisible : false,
+	  		preloadSiteShow : false
 	  	};
 	  	this.onNextPage = this.onNextPage.bind(this);
 	}
@@ -211,8 +214,71 @@ class MySite extends Component{
 
 	}
 
-	deleteSite(){
+	deleteSite(id){
+		Alert.alert(
+			'Attention',
+			'Are you sure want to delete this site?',
+			[
+				{text : 'Sure', onPress: () => this._doDeleteSite(id)},
+				{text : 'No', onPress: () => console.log('No pressed')}
+			]
+		)
+	}
 
+	_doDeleteSite(id){
+		this.setState({
+			preloadSiteShow : true
+		})
+		var indexDelete = _.findLastIndex(dataSiteArr, {ID : id})		
+
+		dataSiteArr.splice(indexDelete, 1)
+
+		// console.log('delete this site id ', id)
+		var request = new Request(CONSTANT.API_URL+'property/delete/'+id, {
+			method : 'GET',
+			headers : {
+				'Content-Type' : 'application/json',
+				'Authorization' : this.state.access_token
+			}
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				console.log(response);
+				this.setState({
+					dataSource : this.state.dataSource.cloneWithRows(dataSiteArr),
+					preloadSiteShow : false
+				})
+			})
+			.catch((err) => {
+				console.log('error', err);
+				this.setState({
+					preloadSiteShow : false
+				})
+				alert('Failed to deleting site data')
+			})
+	}
+
+	preloadSave(status){
+		if(status){
+			return(
+				<View style={{position:'absolute', flex: 1, width: screenWidth, bottom:0, top:0, left:0, right: 0, backgroundColor: 'rgba(255, 255, 255, 0.8)', zIndex: 5}}>
+					<ActivityIndicator
+				        animating={true}
+				        style={{height: 80,padding: 8, marginTop: 50}}
+				        color={styleVar.colors.secondary}
+				        size="large"/>
+				</View>
+			)
+		}else{
+			return(
+				<View>
+				</View>
+			)
+		}
 	}
 
 	render(){
@@ -231,7 +297,9 @@ class MySite extends Component{
 				<View style={styles.containerHome}>
 			    	<HeaderContent onPress={() => this.toggle()} title="My Site" icon="add"
 			    		onClick={() => this.openSiteForm()}/>
+
 			    	<ScrollView style={{backgroundColor : styleVar.colors.greySecondary}}>
+						{this.preloadSave(this.state.preloadSiteShow)}
 			    		{this._renderSiteList()}
 			    		
 			    	</ScrollView>

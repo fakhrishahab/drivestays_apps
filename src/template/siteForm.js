@@ -41,6 +41,7 @@ let screenWidth = Dimensions.get('window').width;
 let screenHeight = Dimensions.get('window').height;
 var index = 1;
 let amenityFormArr = [];
+let closureFormArr = [];
 
 class SiteForm extends Component{
 	constructor(props) {
@@ -51,6 +52,7 @@ class SiteForm extends Component{
 	  		renderPlaceholderOnly : true,
 	  		preloadSaveInfo : false,
 	  		preloadSaveAmenities : false,
+	  		preloadSaveClosure : false,
 	  		siteID : (this.props.data.siteID) ? this.props.data.siteID : null,
 	  		// vehicleID : 126,
 	  		// siteID : 330,
@@ -95,7 +97,9 @@ class SiteForm extends Component{
     		showAmenityForm : false,
     		showPickerAmenityType : false,
     		amenityTypeData : [],
-    		indexEditAmenity : null
+    		indexEditAmenity : null,
+    		showClosureForm : false,
+    		closureFormArr : closureFormArr,
 	  	};
 
 	}
@@ -220,26 +224,60 @@ class SiteForm extends Component{
     	})
     }
 
-	async showPicker(stateKey, options){
+	async showDatePickerClosure(stateKey, options){
 		try {
 			var newState = {};
 			const {action, year, month, day} = await DatePickerAndroid.open(options);
 			if (action === DatePickerAndroid.dismissedAction) {
 				var defaultDate = new Date(options.date)
-				if(!this.state.expiryDateText){
-					newState[stateKey+'Text'] = '';
-				}
+				this.refs.EffectiveFrom.blur();
+				this.refs.EffectiveTo.blur();
+				this.refs.EffectiveFromUpdate.blur()
+				this.refs.EffectiveToUpdate.blur()
 			} else {
 				var date = new Date(year, month, day);
-				// newState[stateKey] = date.getFullYear() + '-'+ parseInt(date.getMonth()+1) + '-' + date.getDate()
+				// console.log(moment(date).format('YYYY-MM-DD'));
+				newState[stateKey] = moment(date).format('YYYY-MM-DD')
+
+				if(stateKey == 'siteInputClosureFrom'){
+					this.setState({
+						minDate : date
+					})
+
+					
+				}else{
+					this.setState({
+						maxDate : date
+					})
+
+					
+				}
+
+				if(options.type){
+					if(stateKey == 'siteInputClosureFromUpdate'){
+						this.state.closureFormArr[options.index].FromDate = date
+						
+						// this.setState({
+						// 	amenityFormArr : amenityFormArr
+						// })	
+					}else{
+						this.state.closureFormArr[options.index].ToDate = date
+						
+						// this.setState({
+						// 	amenityFormArr : amenityFormArr
+						// })
+					}
+
+					this.refs.EffectiveFromUpdate.blur()
+					this.refs.EffectiveToUpdate.blur()
+
+				}
+
+				this.refs.EffectiveFrom.blur();
+				this.refs.EffectiveTo.blur();
 			}
 
-			// this.setState(newState);
-			this.setState({
-				vehicleInputLicenseExp : date.getFullYear() + '-'+ parseInt(date.getMonth()+1) + '-' + date.getDate()
-			})
-			// dismissKeyboard();
-			// this.refs.expiry.blur();
+			this.setState(newState);
 		} catch ({code, message}) {
 			console.warn(`Error in example '${stateKey}': `, message);
 		}
@@ -370,7 +408,7 @@ class SiteForm extends Component{
 				return response.json();
 			})
 			.then((response) => {
-				// console.log(response.Data)
+				console.log(response.Data)
 				this.setState({
 					siteInputAddress1 : response.Data.AddressLine1,
 					siteInputAddress2 : (response.Data.AddressLine2) ? response.Data.AddressLine2 : '',
@@ -392,6 +430,7 @@ class SiteForm extends Component{
 					propertyPictures : response.Data.PropertyPictures,
 					propertyAmenities : response.Data.PropertyAmenities,
 					amenityFormArr : response.Data.PropertyAmenities,
+					closureFormArr : response.Data.PropertyClosures,
 					region : {
 		    			latitude : response.Data.Latitude,
 		    			longitude : response.Data.Longitude,
@@ -401,6 +440,9 @@ class SiteForm extends Component{
 				})
 
 				amenityFormArr = response.Data.PropertyAmenities;
+				closureFormArr = response.Data.PropertyClosures;
+
+				// renderClosure();
 				// console.log(amenityFormArr)
 				// console.log(this.state.propertyAmenities)
 				
@@ -582,7 +624,7 @@ class SiteForm extends Component{
 	preloadSave(status){
 		if(status){
 			return(
-				<View style={{position:'absolute', flex: 1, width: screenWidth, bottom:0, top:0, left:0, right: 0, backgroundColor: 'rgba(255, 255, 255, 0.8)', zIndex: 5}}>
+				<View style={{position:'absolute', flex: 1, width: screenWidth, bottom:0, top:0, left:0, right: 0, backgroundColor: 'rgba(255, 255, 255, 0.8)', zIndex: 5, elevation : 10}}>
 					<ActivityIndicator
 				        animating={true}
 				        style={{height: 80,padding: 8, marginTop: 50}}
@@ -976,6 +1018,7 @@ class SiteForm extends Component{
 								value={data.Memo}
 								onFocus={() => this.openAmenityTypeSelect(index)}
 								blurOnSubmit={true}
+								onChangeText={() => this.refs.Rate.focus()}
 								autoGrow={true}
 								labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
 								inputStyle={{fontFamily : 'gothic'}}/>
@@ -988,6 +1031,7 @@ class SiteForm extends Component{
 			      		scrollEnabled={false}>
 					        <TextField
 					            label={'Rate / Day'}
+					            ref="Rate"
 								highlightColor={styleVar.colors.secondary}
 								editable={true}
 								textColor={styleVar.colors.black}
@@ -1236,7 +1280,7 @@ class SiteForm extends Component{
 					siteInputAmenityTypeID : '',
 				})
 
-				console.log(response)
+				// console.log(response)
 			})
 			.catch((err) => {
 				this.setState({
@@ -1273,8 +1317,8 @@ class SiteForm extends Component{
 			amenityFormArr[this.state.indexEditAmenity].Memo = data.Description;
 			amenityFormArr[this.state.indexEditAmenity].AmenityTypeID = data.ID;	
 
-			console.log('data', data)
-			console.log(amenityFormArr[this.state.indexEditAmenity])
+			// console.log('data', data)
+			// console.log(amenityFormArr[this.state.indexEditAmenity])
 
 			this.setState({
 				showPickerAmenityType : false,
@@ -1289,6 +1333,402 @@ class SiteForm extends Component{
 		}		
 	}
 
+	renderClosure(closureFormArr){
+		console.log('closure',closureFormArr)
+		return(
+			closureFormArr.map((data, index) => {
+				return(
+					<View key={index} style={styles.closureEditForm}>
+						<View style={styles.inputGroupHorizontal} >
+							<ScrollView style={[styles.inputGroupMiddle]}
+				      		showsVerticalScrollIndicator={false}
+				      		scrollEnabled={false}>
+						        <TextField
+						            label={'Effective From'}
+									highlightColor={styleVar.colors.secondary}
+									editable={false}
+									textColor={styleVar.colors.black}
+									labelColor={styleVar.colors.primary}
+									dense={true}
+									ref="EffectiveFromUpdate"
+									keyboardType={'numeric'}
+									value={moment(this.state.closureFormArr[index].FromDate).format('YYYY-MM-DD')}
+									onFocus={this.showDatePickerClosure.bind(this, 'siteInputClosureFromUpdate', {
+										date : new Date(moment(this.state.closureFormArr[index].FromDate).format('YYYY-MM-DD')),
+							          	minDate : new Date(),
+							          	maxDate : new Date(moment(this.state.closureFormArr[index].ToDate).format('YYYY-MM-DD')),
+							          	type : 'update',
+							          	index : index
+							        })}
+									blurOnSubmit={true}
+									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+									inputStyle={{fontFamily : 'gothic'}}/>
+
+									<Icon name="event-available" size={30} color={styleVar.colors.greyDark} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+				      		</ScrollView>
+
+				      		<ScrollView style={[styles.inputGroupMiddle, {marginLeft : 10}]}
+				      		showsVerticalScrollIndicator={false}
+				      		scrollEnabled={false}>
+						        <TextField
+						            label={'Effective To'}
+									highlightColor={styleVar.colors.secondary}
+									editable={false}
+									textColor={styleVar.colors.black}
+									labelColor={styleVar.colors.primary}
+									dense={true}
+									ref="EffectiveToUpdate"
+									keyboardType={'numeric'}
+									value={moment(this.state.closureFormArr[index].ToDate).format('YYYY-MM-DD')}
+									onFocus={this.showDatePickerClosure.bind(this, 'siteInputClosureToUpdate', {
+										date: new Date(moment(this.state.closureFormArr[index].ToDate).format('YYYY-MM-DD')),
+							          	minDate : new Date(moment(this.state.closureFormArr[index].FromDate).format('YYYY-MM-DD')),
+							          	type : 'update',
+							          	index : index
+							        })}
+									blurOnSubmit={true}
+									autoGrow={true}
+									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+									inputStyle={{fontFamily : 'gothic'}}/>
+									<Icon name="event-available" size={30} color={styleVar.colors.greyDark} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+				      		</ScrollView>
+
+						</View>
+						<View style={styles.inputGroupHorizontal} >
+							<ScrollView style={[styles.inputGroupMiddle]}
+				      		showsVerticalScrollIndicator={true}
+				      		scrollEnabled={true}>
+						        <TextField
+						            label={'Description'}
+									highlightColor={styleVar.colors.secondary}
+									editable={true}
+									textColor={styleVar.colors.black}
+									labelColor={styleVar.colors.primary}
+									dense={true}
+									keyboardType={'default'}
+									multiline={false}
+									value={data.Description}
+									onChangeText={(value) => this.state.closureFormArr[index].Description = value }
+									blurOnSubmit={true}
+									autoGrow={true}
+									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+									inputStyle={{fontFamily : 'gothic'}}/>
+				      		</ScrollView>
+				      	</View>
+
+				      	<View style={styles.inputGroupHorizontal} >
+				      		<TouchableWithoutFeedback onPress={() => {this._updateClosure(index)}}>
+				      			<View style={[styles.inputGroupShort, {justifyContent : 'center', alignItems : 'center', backgroundColor : styleVar.colors.secondary}]}>
+				      				<View>
+				      					<Text style={{color : 'white', fontFamily : 'gothic'}}>Edit</Text>
+				      				</View>
+				      			</View>
+				      		</TouchableWithoutFeedback>
+					      	
+				      		<TouchableWithoutFeedback onPress={() => {this._deleteClosure(index)}}>
+
+					      		<View style={[styles.inputGroupShort, {justifyContent : 'center', alignItems : 'center', backgroundColor : styleVar.colors.greyPrimary}]}>
+				      				<View>
+				      					<Text style={{color : 'white', fontFamily : 'gothic'}}>Delete</Text>
+				      				</View>
+					      		</View>
+				      		</TouchableWithoutFeedback>
+					    </View>	
+				    </View>
+				)
+			})
+			
+		)
+	}
+
+	_updateClosure(index){
+		var data = this.state.closureFormArr[index];
+
+		this.setState({
+			preloadSaveClosure : true
+		});
+
+		var request = new Request(CONSTANT.API_URL+'propertyclosure/update', {
+			method : 'POST',
+			headers : {
+    			'Accept': 'application/json',
+				'Content-Type' : 'application/json',
+				'Authorization' : this.state.access_token
+			},
+			body : JSON.stringify({
+				ID : data.ID,
+				FromDate : moment(data.FromDate).format('YYYY-MM-DD'),
+				ToDate : moment(data.ToDate).format('YYYY-MM-DD'),
+				Description : data.Description,
+				Memo : '',
+				Booking : 0,
+				PropertyID : this.state.siteID
+			})
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				// console.log(response);
+				this.setState({
+					preloadSaveClosure : false
+				})
+			})
+			.catch((err) => {
+				console.log('error', err);
+				this.setState({
+					preloadSaveClosure : false
+				})
+				alert('Failed to updating property closure data');
+			})
+	}
+
+	_deleteClosure(index){
+		Alert.alert(
+			'Warning',
+			'Are you sure want to delete this data?',
+			[
+				{ text : 'Sure', onPress : () => this._doDeleteClosure(index)},
+				{ text : 'No', onPress : console.log('cancel delete') }
+			]
+		);
+	}
+
+	_doDeleteClosure(index){
+
+		this.setState({
+			preloadSaveClosure : true
+		});
+
+		var request = new Request(CONSTANT.API_URL+'propertyclosure/delete/'+this.state.closureFormArr[index].ID, {
+			method : 'GET',
+			headers : {
+				'Content-Type' : 'application/json',
+				'Authorization' : this.state.access_token
+			}
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				console.log(response);
+
+				this.state.closureFormArr.splice(index, 1);
+
+				this.setState({
+					closureFormArr : this.state.closureFormArr,
+					preloadSaveClosure : false
+				});
+			})
+			.catch((err) => {
+				console.log('error', err);
+				this.setState({
+					preloadSaveClosure : false
+				});
+				alert('Failed to delete property closure data')
+			})
+	}
+
+	setDescriptionValue(index, value){
+		closureFormArr[index].Description = value;
+
+		this.setState({
+			closureFormArr : closureFormArr
+		})
+	}
+
+	renderClosureButton(){
+		if(this.state.showClosureForm){
+			return(
+				<View style={styles.closureAddForm}>
+					<View style={styles.inputGroupHorizontal} >
+						<ScrollView style={[styles.inputGroupMiddle]}
+			      		showsVerticalScrollIndicator={false}
+			      		scrollEnabled={false}>
+					        <TextField
+					            label={'Effective From'}
+								highlightColor={styleVar.colors.secondary}
+								editable={false}
+								textColor={styleVar.colors.black}
+								labelColor={styleVar.colors.primary}
+								dense={true}
+								ref="EffectiveFrom"
+								keyboardType={'numeric'}
+								value={this.state.siteInputClosureFrom}
+								onFocus={this.showDatePickerClosure.bind(this, 'siteInputClosureFrom', {
+									date : new Date(this.state.siteInputClosureFrom),
+						          	minDate : new Date(),
+						          	maxDate : new Date(this.state.maxDate),
+						          	mode : 'spinner'
+						        })}
+								blurOnSubmit={true}
+								labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+								inputStyle={{fontFamily : 'gothic'}}/>
+
+								<Icon name="event-available" size={30} color={styleVar.colors.greyDark} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+			      		</ScrollView>
+
+			      		<ScrollView style={[styles.inputGroupMiddle, {marginLeft : 10}]}
+			      		showsVerticalScrollIndicator={false}
+			      		scrollEnabled={false}>
+					        <TextField
+					            label={'Effective To'}
+								highlightColor={styleVar.colors.secondary}
+								editable={false}
+								textColor={styleVar.colors.black}
+								labelColor={styleVar.colors.primary}
+								dense={true}
+								ref="EffectiveTo"
+								keyboardType={'numeric'}
+								value={this.state.siteInputClosureTo}
+								onChangeText={(value) => this.state.siteInputClosureTo = value}
+								onFocus={this.showDatePickerClosure.bind(this, 'siteInputClosureTo', {
+									date: new Date(this.state.siteInputClosureTo),
+						          	minDate : new Date(this.state.minDate)
+						        })}
+								blurOnSubmit={true}
+								autoGrow={true}
+								labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+								inputStyle={{fontFamily : 'gothic'}}/>
+								<Icon name="event-available" size={30} color={styleVar.colors.greyDark} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+			      		</ScrollView>
+
+					</View>
+					<View style={styles.inputGroupHorizontal} >
+						<ScrollView style={[styles.inputGroupMiddle]}
+			      		showsVerticalScrollIndicator={true}
+			      		scrollEnabled={true}>
+					        <TextField
+					            label={'Description'}
+								highlightColor={styleVar.colors.secondary}
+								editable={true}
+								textColor={styleVar.colors.black}
+								labelColor={styleVar.colors.primary}
+								dense={true}
+								keyboardType={'default'}
+								multiline={false}
+								value={this.state.siteInputClosureDesc}
+								onChangeText={(value) => this.setState({siteInputClosureDesc : value}) }
+								blurOnSubmit={true}
+								autoGrow={true}
+								labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+								inputStyle={{fontFamily : 'gothic'}}/>
+			      		</ScrollView>
+			      	</View>
+
+			      	<View style={styles.inputGroupHorizontal} >
+			      		<TouchableWithoutFeedback onPress={() => {this._addNewClosure()}}>
+			      			<View style={[styles.inputGroupShort, {justifyContent : 'center', alignItems : 'center', backgroundColor : styleVar.colors.secondary}]}>
+			      				<View>
+			      					<Text style={{color : 'white', fontFamily : 'gothic'}}>Save</Text>
+			      				</View>
+			      			</View>
+			      		</TouchableWithoutFeedback>
+				      	
+			      		<TouchableWithoutFeedback onPress={() => {this._cancelAddClosure()}}>
+
+				      		<View style={[styles.inputGroupShort, {justifyContent : 'center', alignItems : 'center', backgroundColor : styleVar.colors.greyPrimary}]}>
+			      				<View>
+			      					<Text style={{color : 'white', fontFamily : 'gothic'}}>Cancel</Text>
+			      				</View>
+				      		</View>
+			      		</TouchableWithoutFeedback>
+				    </View>	
+			    </View>
+			)
+		}else{
+			return(
+				<TouchableWithoutFeedback onPress={() => this.addClosureButton()}>
+			    	<View style={styles.buttonSave} ref="buttonNew">
+			    		<Text style={{fontFamily : 'gothic', color : '#FFF', fontSize : 14}}>Add Closure</Text>
+			    	</View>
+			    </TouchableWithoutFeedback>
+			)
+		}
+	}
+
+	addClosureButton(){
+		this.setState({
+			showClosureForm : true
+		})
+	}
+
+	_addNewClosure(){
+
+		this.setState({
+			preloadSaveClosure : true
+		});
+
+		var request = new Request(CONSTANT.API_URL+'propertyclosure/save', {
+			method : 'POST',
+			headers : {
+				'Content-Type' : 'application/json',
+				'Authorization' : this.state.access_token
+			},
+			body : JSON.stringify({
+				FromDate : moment(this.state.siteInputClosureFrom).format(),
+				ToDate : moment(this.state.siteInputClosureTo).format(),
+				Description : this.state.siteInputClosureDesc,
+				Memo : null,
+				Booking : 0 ,
+				PropertyID : this.state.siteID
+			})
+		})
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				// console.log(response);
+				var data = {
+					'ID' : response.Data,
+					'FromDate' : moment(this.state.siteInputClosureFrom).format(),
+					'ToDate' : moment(this.state.siteInputClosureTo).format(),
+					'Description' : this.state.siteInputClosureDesc,
+					'Memo' : null,
+					'Booking' : false ,
+					'PropertyID' : this.state.siteID,
+				}
+
+				closureFormArr = this.state.closureFormArr;
+				closureFormArr.push(data);
+
+				this.setState({
+					closureFormArr : closureFormArr,
+					preloadSaveClosure : false
+				})
+			})
+			.catch((err) => {
+				console.log('error', err);
+				this.setState({
+					preloadSaveClosure : false
+				})
+				alert('Failed to create property closure data')
+			})
+
+	}
+
+	_cancelAddClosure(){
+		this.setState({
+			siteInputClosureFrom : '',
+			siteInputClosureTo : '',
+			showClosureForm : false
+		})
+	}
+
+	handleChangeTab({i, ref, from}){
+		if(i == 2){
+			// console.log(this.state.closureFormArr)
+			closureFormArr = this.state.closureFormArr;
+			// this.renderClosure(closureFormArr);
+		}
+	}
+
 	render(){
 		if (this.state.renderPlaceholderOnly) {
 	    	return this.preload();
@@ -1299,9 +1739,10 @@ class SiteForm extends Component{
 		return(
 			<View style={styles.containerHome}>
 				<View style={[styles.headerModal]}>
-					<Icon name='close' size={30} color="#FFF" onPress={ () => this.backSite() }></Icon>
+					<Icon name='arrow-back' size={30} color="#FFF" onPress={ () => this.backSite() }></Icon>
 					<Text style={styles.headerTitle}>Add Site</Text>
-					<Icon name='done' size={30} color="#FFF" onPress={() => this.saveDataSite()}/>
+					<View style={{width : 30}}/>
+					
 				</View>
 
 				<ModalSelect 
@@ -1319,6 +1760,7 @@ class SiteForm extends Component{
 					tabBarUnderlineColor={styleVar.colors.primary}
 					tabBarInactiveTextColor={styleVar.colors.greyDark}
 	      			tabBarTextStyle={{fontFamily: 'gothic', fontSize: 15}}
+	      			onChangeTab={this.handleChangeTab.bind(this)}
 				>
 					<ScrollView
 						tabLabel="SITE INFO"
@@ -1332,7 +1774,7 @@ class SiteForm extends Component{
 
 					<ScrollView
 						tabLabel="AMENITIES"
-						key={2}
+						key={1}
 						style={styles.scrollbarView}	
 						showsVerticalScrollIndicator={true}>
 
@@ -1347,7 +1789,25 @@ class SiteForm extends Component{
 							}
 							
 						</View>
+					</ScrollView>
 
+					<ScrollView
+						tabLabel="CLOSURE DATE"
+						key={2}
+						style={styles.scrollbarView}	
+						showsVerticalScrollIndicator={true}>
+
+						{this.preloadSave(this.state.preloadSaveClosure)}
+						<View style={styles.containerContent}>
+							{
+								this.renderClosure(this.state.closureFormArr)
+							}
+
+							{
+								this.renderClosureButton()
+							}
+							
+						</View>
 					</ScrollView>
 				</ScrollTabView>
 					

@@ -100,7 +100,7 @@ module.exports = {
 		borderRadius : 5,
 		marginVertical : 15,
 		alignItems : 'center',
-		backgroundColor : styleVar.colors.primary
+		backgroundColor : styleVar.colors.secondary
 	},
 	imageButtonWrapper : {
 		bottom: 0,
@@ -141,7 +141,7 @@ module.exports = {
 	},
 	inputGroupHorizontal : {
 		flexDirection : 'row',
-		justifyContent : 'space-around'
+		justifyContent : 'space-between'
 	},
 	inputGroupLong : {
 		flex : 2,
@@ -155,6 +155,12 @@ module.exports = {
 		paddingVertical : -5,
 		height : 55,
 	},
+	inputGroupShort : {
+		flex : 0.5,
+		paddingLeft : 0,
+		paddingVertical : -5,
+		height : 55,
+	},
 	inputGroupSeparator : {
 		marginLeft : 5
 	},
@@ -164,5 +170,19 @@ module.exports = {
 		// backgroundColor : styleVar.colors.greySecondary,
 		alignItems : 'center',
 		justifyContent : 'center'
+	},
+	closureAddForm : {
+		borderTopWidth : 1,
+		borderTopColor : styleVar.colors.primaryDark,
+		borderStyle : 'solid'
+	},
+	closureEditForm : {
+		backgroundColor : styleVar.colors.greySecondary,
+		padding : 10,
+		marginBottom : 10,
+		elevation : 1,
+		borderStyle : 'solid',
+		borderWidth : 1,
+		borderColor : '#CCC'
 	}
 }
