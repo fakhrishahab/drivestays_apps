@@ -10,9 +10,9 @@ module.exports = {
 		flex:1
 	},
 	containerContent : {
-		// flex : 1,
+		flex : 1,
 		// backgroundColor : styleVar.colors.greySecondary,
-		// backgroundColor : '#FFFFFF',
+		backgroundColor : '#FFFFFF',
 		padding: 10,
 		// paddingVertical : -5
 	},
@@ -159,7 +159,7 @@ module.exports = {
 		flex : 0.5,
 		paddingLeft : 0,
 		paddingVertical : -5,
-		height : 55,
+		height : 40,
 	},
 	inputGroupSeparator : {
 		marginLeft : 5

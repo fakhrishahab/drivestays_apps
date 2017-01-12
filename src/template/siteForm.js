@@ -42,6 +42,7 @@ let screenHeight = Dimensions.get('window').height;
 var index = 1;
 let amenityFormArr = [];
 let closureFormArr = [];
+let rateFormArr = [];
 
 class SiteForm extends Component{
 	constructor(props) {
@@ -53,6 +54,7 @@ class SiteForm extends Component{
 	  		preloadSaveInfo : false,
 	  		preloadSaveAmenities : false,
 	  		preloadSaveClosure : false,
+	  		preloadSaveRate : false,
 	  		siteID : (this.props.data.siteID) ? this.props.data.siteID : null,
 	  		// vehicleID : 126,
 	  		// siteID : 330,
@@ -100,8 +102,13 @@ class SiteForm extends Component{
     		indexEditAmenity : null,
     		showClosureForm : false,
     		closureFormArr : closureFormArr,
+    		rateFormArr : rateFormArr,
+    		showRateForm : false,
+    		rateTypeData : [],
+    		showPickerRateType : false,
+    		siteInputRateTypeID : '',
+    		siteInputRateType : '',
 	  	};
-
 	}
 
 	validateForm(){
@@ -224,19 +231,84 @@ class SiteForm extends Component{
     	})
     }
 
+    async showDatePickerRate(stateKey, options){
+    	try{
+    		var newState = {};
+    		const {action, year, month, day} = await DatePickerAndroid.open(options);
+
+    		if(action == DatePickerAndroid.dismissedAction){
+
+    			if(options.type == 'update'){
+					this.refs.EffectiveFromRateUpdate.blur();
+					this.refs.EffectiveToRateUpdate.blur();
+				}else{
+					this.refs.EffectiveFromRate.blur();
+					this.refs.EffectiveToRate.blur();
+				}
+
+    		}else{
+
+    			var date = new Date(year, month, day);
+    			newState[stateKey] = moment(date).format('YYYY-MM-DD')
+
+				if(stateKey == 'siteInputRateFrom'){
+
+					this.setState({
+						minDateRate : date
+					});
+
+				}else{
+
+					this.setState({
+						maxDateRate : date
+					});
+
+				}
+
+				if(options.type){
+
+					if(stateKey == 'siteInputRateFromUpdate'){
+						this.state.rateFormArr[options.index].FromDate = date;
+						this.refs.EffectiveFromRateUpdate.blur();
+					}else{
+						this.state.rateFormArr[options.index].ToDate = date
+						// this.refs.EffectiveToDateUpdate.blur();
+					}
+
+					// this.refs.EffectiveFromRateUpdate.blur()
+					// this.refs.EffectiveToDateUpdate.blur()
+
+				}else{
+					this.refs.EffectiveFromRate.blur();
+					this.refs.EffectiveToRate.blur();
+				}
+
+
+    		}
+
+    		this.setState(newState);
+
+    	}catch ({code, message}) {
+			console.warn(`Error in example '${stateKey}': `, message);
+		}
+    }
+
 	async showDatePickerClosure(stateKey, options){
 		try {
 			var newState = {};
 			const {action, year, month, day} = await DatePickerAndroid.open(options);
 			if (action === DatePickerAndroid.dismissedAction) {
 				var defaultDate = new Date(options.date)
-				this.refs.EffectiveFrom.blur();
-				this.refs.EffectiveTo.blur();
-				this.refs.EffectiveFromUpdate.blur()
-				this.refs.EffectiveToUpdate.blur()
+				if(options.type == 'update'){
+					this.refs.EffectiveFromUpdate.blur();
+					this.refs.EffectiveToUpdate.blur();
+				}else{
+					this.refs.EffectiveFrom.blur();
+					this.refs.EffectiveTo.blur();
+				}
+				
 			} else {
 				var date = new Date(year, month, day);
-				// console.log(moment(date).format('YYYY-MM-DD'));
 				newState[stateKey] = moment(date).format('YYYY-MM-DD')
 
 				if(stateKey == 'siteInputClosureFrom'){
@@ -256,25 +328,19 @@ class SiteForm extends Component{
 				if(options.type){
 					if(stateKey == 'siteInputClosureFromUpdate'){
 						this.state.closureFormArr[options.index].FromDate = date
-						
-						// this.setState({
-						// 	amenityFormArr : amenityFormArr
-						// })	
 					}else{
 						this.state.closureFormArr[options.index].ToDate = date
-						
-						// this.setState({
-						// 	amenityFormArr : amenityFormArr
-						// })
 					}
 
 					this.refs.EffectiveFromUpdate.blur()
 					this.refs.EffectiveToUpdate.blur()
 
+				}else{
+					this.refs.EffectiveFrom.blur();
+					this.refs.EffectiveTo.blur();
 				}
 
-				this.refs.EffectiveFrom.blur();
-				this.refs.EffectiveTo.blur();
+				
 			}
 
 			this.setState(newState);
@@ -312,16 +378,21 @@ class SiteForm extends Component{
         	this.setState({"access_token": value});
 
         	this._getAmenityType();
+        	this._getRateType();
 
         	if(this.state.siteID){
         		this._getSiteData(this.state.siteID)
         	}else{
         		amenityFormArr = [];
+        		closureFormArr = [];
+        		rateFormArr = [];
         		this.setState({
-        			amenityFormArr : []
-        		})
+        			amenityFormArr : [],
+        			closureFormArr : [],
+        			rateFormArr : []
+        		});
         	}
-    	})
+    	});
 
     	if(this.state.siteID){
     		this.setState({
@@ -408,7 +479,7 @@ class SiteForm extends Component{
 				return response.json();
 			})
 			.then((response) => {
-				console.log(response.Data)
+				// console.log(response.Data)
 				this.setState({
 					siteInputAddress1 : response.Data.AddressLine1,
 					siteInputAddress2 : (response.Data.AddressLine2) ? response.Data.AddressLine2 : '',
@@ -431,6 +502,7 @@ class SiteForm extends Component{
 					propertyAmenities : response.Data.PropertyAmenities,
 					amenityFormArr : response.Data.PropertyAmenities,
 					closureFormArr : response.Data.PropertyClosures,
+					rateFormArr : response.Data.PropertyRates,
 					region : {
 		    			latitude : response.Data.Latitude,
 		    			longitude : response.Data.Longitude,
@@ -441,6 +513,7 @@ class SiteForm extends Component{
 
 				amenityFormArr = response.Data.PropertyAmenities;
 				closureFormArr = response.Data.PropertyClosures;
+				rateFormArr = response.Data.PropertyRates;
 
 				// renderClosure();
 				// console.log(amenityFormArr)
@@ -450,7 +523,8 @@ class SiteForm extends Component{
 				// vehiclePictures = response.Data.VehiclePictures
 			})
 			.catch((err) => {
-				console.log('cannot retrieve site data')
+				console.log('error',err)
+				Alert('cannot retrieve site data')
 			})
 	}
 
@@ -556,7 +630,7 @@ class SiteForm extends Component{
 				return response.json()
 			})
 			.then((response) => {
-				console.log(response.Data)
+				// console.log(response.Data)
 				this.setState({
 					preloadSaveInfo : false
 				})
@@ -606,7 +680,7 @@ class SiteForm extends Component{
 				return response.json()
 			})
 			.then((response) => {
-				console.log(response)
+				// console.log(response)
 				this.setState({
 					preloadSaveInfo : false,
 				})
@@ -634,7 +708,7 @@ class SiteForm extends Component{
 			)
 		}else{
 			return(
-				<View>
+				<View style={{backgroundColor : 'red', position:'absolute'}}>
 				</View>
 			)
 		}
@@ -1124,7 +1198,7 @@ class SiteForm extends Component{
 				return response.json();
 			})
 			.then((response) => {
-				console.log(response);
+				// console.log(response);
 
 				amenityFormArr.splice(index, 1)
 
@@ -1305,7 +1379,7 @@ class SiteForm extends Component{
 			showPickerAmenityType : true
 		})
 
-		if(index){
+		if(index!=null){
 			this.setState({
 				indexEditAmenity : index
 			})
@@ -1334,7 +1408,7 @@ class SiteForm extends Component{
 	}
 
 	renderClosure(closureFormArr){
-		console.log('closure',closureFormArr)
+		// console.log('closure',closureFormArr)
 		return(
 			closureFormArr.map((data, index) => {
 				return(
@@ -1515,7 +1589,7 @@ class SiteForm extends Component{
 				return response.json();
 			})
 			.then((response) => {
-				console.log(response);
+				// console.log(response);
 
 				this.state.closureFormArr.splice(index, 1);
 
@@ -1652,9 +1726,13 @@ class SiteForm extends Component{
 	}
 
 	addClosureButton(){
-		this.setState({
-			showClosureForm : true
-		})
+		if(this.state.siteID){
+			this.setState({
+				showClosureForm : true
+			});
+		}else{
+			alert('You must add site info first');
+		}
 	}
 
 	_addNewClosure(){
@@ -1721,11 +1799,540 @@ class SiteForm extends Component{
 		})
 	}
 
+	_getRateType(){
+		var request = new Request(CONSTANT.API_URL+'rateTypes/get', {
+			method : 'GET',
+			headers : {
+				'Content-Type' : 'application/json',
+				'Authorization' : this.state.access_token
+			}
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				// console.log(response)
+				this.setState({
+					rateTypeData : response.Data
+				});
+			})
+			.catch((err) => {
+				console.log('error', err);
+				alert('Failed to retrieve rate type data');
+			})
+	}
+
+	renderRate(rateFormArr){
+		return(
+			rateFormArr.map((key, index) => {
+				
+				return(
+					<View key={index} style={styles.closureEditForm}>
+						<View style={styles.inputGroupHorizontal} >
+							<ScrollView style={styles.inputGroupLong}
+					      		showsVerticalScrollIndicator={false}
+					      		scrollEnabled={false}>
+						        <TextField
+						            label={'Rate Type'}
+									highlightColor={styleVar.colors.secondary}
+									editable={false}
+									textColor={styleVar.colors.black}
+									labelColor={styleVar.colors.primary}
+									dense={true}
+									value={_.findWhere(this.state.rateTypeData, {ID : key.RateTypeID}).Description}
+									onFocus={() => this.openRateTypeSelect(index)}
+									blurOnSubmit={true}
+									onChangeText={() => this.refs.EffectiveFromRateUpdate.focus()}
+									autoGrow={true}
+									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+									inputStyle={{fontFamily : 'gothic'}}/>
+
+						        <Icon name="arrow-drop-down" size={30} color={styleVar.colors.primary} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+				      		</ScrollView>
+			      		</View>
+
+			      		<View style={styles.inputGroupHorizontal} >
+							<ScrollView style={[styles.inputGroupMiddle]}
+				      		showsVerticalScrollIndicator={false}
+				      		scrollEnabled={false}>
+						        <TextField
+						            label={'Effective From'}
+									highlightColor={styleVar.colors.secondary}
+									editable={false}
+									textColor={styleVar.colors.black}
+									labelColor={styleVar.colors.primary}
+									dense={true}
+									ref="EffectiveFromRateUpdate"
+									keyboardType={'numeric'}
+									value={moment(this.state.rateFormArr[index].FromDate).format('YYYY-MM-DD')}
+									onFocus={this.showDatePickerRate.bind(this, 'siteInputRateFromUpdate', {
+										date : new Date(moment(this.state.rateFormArr[index].FromDate).format('YYYY-MM-DD')),
+							          	minDate : new Date(),
+							          	maxDate : new Date(moment(this.state.rateFormArr[index].ToDate).format('YYYY-MM-DD')),
+							          	mode : 'spinner',
+							          	type : 'update',
+							          	index : index
+							        })}
+									blurOnSubmit={true}
+									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+									inputStyle={{fontFamily : 'gothic'}}/>
+
+									<Icon name="event-available" size={30} color={styleVar.colors.greyDark} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+				      		</ScrollView>
+
+				      		<ScrollView style={[styles.inputGroupMiddle, {marginLeft : 10}]}
+				      		showsVerticalScrollIndicator={false}
+				      		scrollEnabled={false}>
+						        <TextField
+						            label={'Effective To'}
+									highlightColor={styleVar.colors.secondary}
+									editable={false}
+									textColor={styleVar.colors.black}
+									labelColor={styleVar.colors.primary}
+									dense={true}
+									ref="EffectiveToRateUpdate"
+									keyboardType={'numeric'}
+									value={moment(this.state.rateFormArr[index].ToDate).format('YYYY-MM-DD')}
+									onFocus={this.showDatePickerRate.bind(this, 'siteInputRateToUpdate', {
+										date: new Date(moment(this.state.rateFormArr[index].ToDate).format('YYYY-MM-DD')),
+							          	minDate : new Date(moment(this.state.rateFormArr[index].FromDate).format('YYYY-MM-DD')),
+							          	type : 'update',
+							          	index : index
+							        })}
+									blurOnSubmit={true}
+									autoGrow={true}
+									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+									inputStyle={{fontFamily : 'gothic'}}/>
+									<Icon name="event-available" size={30} color={styleVar.colors.greyDark} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+				      		</ScrollView>
+						</View>
+
+						<View style={styles.inputGroupHorizontal} >
+							<ScrollView style={[styles.inputGroupMiddle]}
+				      		showsVerticalScrollIndicator={true}
+				      		scrollEnabled={true}>
+						        <TextField
+						            label={'Rate ($)'}
+									highlightColor={styleVar.colors.secondary}
+									editable={true}
+									textColor={styleVar.colors.black}
+									labelColor={styleVar.colors.primary}
+									dense={true}
+									keyboardType={'numeric'}
+									multiline={false}
+									value={this.state.rateFormArr[index].Rate.toString()}
+									onChangeText={(value) => this.state.rateFormArr[index].Rate = parseInt(value) }
+									blurOnSubmit={true}
+									autoGrow={true}
+									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+									inputStyle={{fontFamily : 'gothic'}}/>
+				      		</ScrollView>
+
+				      		<ScrollView style={[styles.inputGroupMiddle]}
+				      		showsVerticalScrollIndicator={true}
+				      		scrollEnabled={true}>
+						        <TextField
+						            label={'Weekend Surcharge'}
+									highlightColor={styleVar.colors.secondary}
+									editable={true}
+									textColor={styleVar.colors.black}
+									labelColor={styleVar.colors.primary}
+									dense={true}
+									keyboardType={'numeric'}
+									multiline={false}
+									value=''
+									onChangeText={(value) => console.log(value) }
+									blurOnSubmit={true}
+									autoGrow={true}
+									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+									inputStyle={{fontFamily : 'gothic'}}/>
+				      		</ScrollView>
+			      		</View>
+
+			      		<View style={styles.inputGroupHorizontal} >
+				      		<TouchableWithoutFeedback onPress={() => {this._updateRate(index)}}>
+				      			<View style={[styles.inputGroupShort, {justifyContent : 'center', alignItems : 'center', backgroundColor : styleVar.colors.secondary}]}>
+				      				<View>
+				      					<Text style={{color : 'white', fontFamily : 'gothic'}}>Edit</Text>
+				      				</View>
+				      			</View>
+				      		</TouchableWithoutFeedback>
+					      	
+				      		<TouchableWithoutFeedback onPress={() => {this._deleteRate(index)}}>
+
+					      		<View style={[styles.inputGroupShort, {justifyContent : 'center', alignItems : 'center', backgroundColor : styleVar.colors.greyPrimary}]}>
+				      				<View>
+				      					<Text style={{color : 'white', fontFamily : 'gothic'}}>Delete</Text>
+				      				</View>
+					      		</View>
+				      		</TouchableWithoutFeedback>
+					    </View>		
+
+					</View>
+				)
+			})
+		)
+	}
+
+	_updateRate(index){
+		var data = this.state.rateFormArr[index];
+
+		this.setState({
+			preloadSaveRate : true
+		});
+
+		var request = new Request(CONSTANT.API_URL+'propertyRate/update', {
+			method : 'POST',
+			headers : {
+    			'Accept': 'application/json',
+				'Content-Type' : 'application/json',
+				'Authorization' : this.state.access_token
+			},
+			body : JSON.stringify({
+				ID : data.ID,
+				FromDate : moment(data.FromDate).format('YYYY-MM-DD'),
+				ToDate : moment(data.ToDate).format('YYYY-MM-DD'),
+				Rate : data.Rate,
+				Memo : '',
+				RateTypeID : data.RateTypeID,
+				PropertyID : this.state.siteID
+			})
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				// console.log(response);
+				this.setState({
+					preloadSaveRate : false,
+					indexEditRate : null
+				})
+			})
+			.catch((err) => {
+				console.log('error', err);
+				this.setState({
+					preloadSaveRate : false
+				})
+				alert('Failed to updating property rate data');
+			})
+	}
+
+	_deleteRate(index){
+		Alert.alert(
+			'Warning',
+			'Are you sure want to delete this data?',
+			[
+				{ text : 'Sure', onPress : () => this._doDeleteRate(index)},
+				{ text : 'No', onPress : () => console.log('cancel delete') }
+			]
+		);
+	}
+
+	_doDeleteRate(index){
+
+		this.setState({
+			preloadSaveRate : true
+		});
+
+		var request = new Request(CONSTANT.API_URL+'propertyRate/delete/'+this.state.rateFormArr[index].ID, {
+			method : 'GET',
+			headers : {
+				'Content-Type' : 'application/json',
+				'Authorization' : this.state.access_token
+			}
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				// console.log(response);
+
+				this.state.rateFormArr.splice(index, 1);
+
+				this.setState({
+					rateFormArr : this.state.rateFormArr,
+					preloadSaveRate : false
+				});
+			})
+			.catch((err) => {
+				console.log('error', err);
+				this.setState({
+					preloadSaveRate : false
+				});
+				alert('Failed to delete property rate data')
+			})
+	}
+
+	openRateTypeSelect(index){
+		this.setState({
+			showPickerRateType : true
+		})
+
+		if(index!=null){
+			this.setState({
+				indexEditRate : index
+			})
+		}
+	}
+
+	chooseRateType(data){
+		if(this.state.indexEditRate!=null){
+			rateFormArr[this.state.indexEditRate].RateTypeID = data.ID;	
+
+			this.setState({
+				showPickerRateType : false,
+				rateFormArr : rateFormArr,
+			})
+		}else{
+			this.setState({
+				showPickerRateType : false,
+				siteInputRateType : data.Description,
+				siteInputRateTypeID : data.ID
+			})
+		}
+	}
+
+	renderRateButton(){
+		if(this.state.showRateForm){
+			return(
+				<View style={styles.closureAddForm}>
+					<View style={styles.inputGroupHorizontal} >
+						<ScrollView style={styles.inputGroupLong}
+				      		showsVerticalScrollIndicator={false}
+				      		scrollEnabled={false}>
+					        <TextField
+					            label={'Rate Type'}
+								highlightColor={styleVar.colors.secondary}
+								editable={false}
+								textColor={styleVar.colors.black}
+								labelColor={styleVar.colors.primary}
+								dense={true}
+								value={this.state.siteInputRateType}
+								onFocus={() => this.openRateTypeSelect()}
+								blurOnSubmit={true}
+								onChangeText={() => this.refs.EffectiveFromRate.focus()}
+								autoGrow={true}
+								labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+								inputStyle={{fontFamily : 'gothic'}}/>
+
+					        <Icon name="arrow-drop-down" size={30} color={styleVar.colors.primary} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+			      		</ScrollView>
+			      	</View>
+
+			      	<View style={styles.inputGroupHorizontal} >
+						<ScrollView style={[styles.inputGroupMiddle]}
+			      		showsVerticalScrollIndicator={false}
+			      		scrollEnabled={false}>
+					        <TextField
+					            label={'Effective From'}
+								highlightColor={styleVar.colors.secondary}
+								editable={false}
+								textColor={styleVar.colors.black}
+								labelColor={styleVar.colors.primary}
+								dense={true}
+								ref="EffectiveFromRate"
+								keyboardType={'numeric'}
+								value={this.state.siteInputRateFrom}
+								onFocus={this.showDatePickerRate.bind(this, 'siteInputRateFrom', {
+									date : new Date(this.state.siteInputRateFrom),
+						          	minDate : new Date(),
+						          	maxDate : new Date(this.state.maxDateRate),
+						          	mode : 'spinner'
+						        })}
+								blurOnSubmit={true}
+								labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+								inputStyle={{fontFamily : 'gothic'}}/>
+
+								<Icon name="event-available" size={30} color={styleVar.colors.greyDark} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+			      		</ScrollView>
+
+			      		<ScrollView style={[styles.inputGroupMiddle, {marginLeft : 10}]}
+			      		showsVerticalScrollIndicator={false}
+			      		scrollEnabled={false}>
+					        <TextField
+					            label={'Effective To'}
+								highlightColor={styleVar.colors.secondary}
+								editable={false}
+								textColor={styleVar.colors.black}
+								labelColor={styleVar.colors.primary}
+								dense={true}
+								ref="EffectiveToRate"
+								keyboardType={'numeric'}
+								value={this.state.siteInputRateTo}
+								onChangeText={(value) => this.state.siteInputRateTo = value}
+								onFocus={this.showDatePickerRate.bind(this, 'siteInputRateTo', {
+									date: new Date(this.state.siteInputRateTo),
+						          	minDate : new Date(this.state.minDateRate)
+						        })}
+								blurOnSubmit={true}
+								autoGrow={true}
+								labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+								inputStyle={{fontFamily : 'gothic'}}/>
+								<Icon name="event-available" size={30} color={styleVar.colors.greyDark} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+			      		</ScrollView>
+					</View>
+
+					<View style={styles.inputGroupHorizontal} >
+						<ScrollView style={[styles.inputGroupMiddle]}
+			      		showsVerticalScrollIndicator={true}
+			      		scrollEnabled={true}>
+					        <TextField
+					            label={'Rate ($)'}
+								highlightColor={styleVar.colors.secondary}
+								editable={true}
+								textColor={styleVar.colors.black}
+								labelColor={styleVar.colors.primary}
+								dense={true}
+								keyboardType={'numeric'}
+								multiline={false}
+								value={this.state.siteInputRateValue}
+								onChangeText={(value) => this.setState({siteInputRateValue : value}) }
+								blurOnSubmit={true}
+								autoGrow={true}
+								labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+								inputStyle={{fontFamily : 'gothic'}}/>
+			      		</ScrollView>
+
+			      		<ScrollView style={[styles.inputGroupMiddle]}
+			      		showsVerticalScrollIndicator={true}
+			      		scrollEnabled={true}>
+					        <TextField
+					            label={'Weekend Surcharge'}
+								highlightColor={styleVar.colors.secondary}
+								editable={true}
+								textColor={styleVar.colors.black}
+								labelColor={styleVar.colors.primary}
+								dense={true}
+								keyboardType={'numeric'}
+								multiline={false}
+								value={this.state.siteInputRateSurcharge}
+								onChangeText={(value) => this.setState({siteInputRateSurcharge : value}) }
+								blurOnSubmit={true}
+								autoGrow={true}
+								labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+								inputStyle={{fontFamily : 'gothic'}}/>
+			      		</ScrollView>
+			      	</View>					
+
+			      	<View style={styles.inputGroupHorizontal} >
+			      		<TouchableWithoutFeedback onPress={() => {this._addNewRate()}}>
+			      			<View style={[styles.inputGroupShort, {justifyContent : 'center', alignItems : 'center', backgroundColor : styleVar.colors.secondary}]}>
+			      				<View>
+			      					<Text style={{color : 'white', fontFamily : 'gothic'}}>Save</Text>
+			      				</View>
+			      			</View>
+			      		</TouchableWithoutFeedback>
+				      	
+			      		<TouchableWithoutFeedback onPress={() => {this._cancelAddRate()}}>
+
+				      		<View style={[styles.inputGroupShort, {justifyContent : 'center', alignItems : 'center', backgroundColor : styleVar.colors.greyPrimary}]}>
+			      				<View>
+			      					<Text style={{color : 'white', fontFamily : 'gothic'}}>Cancel</Text>
+			      				</View>
+				      		</View>
+			      		</TouchableWithoutFeedback>
+				    </View>	
+			    </View>
+			)
+		}else{
+			return(
+				<TouchableWithoutFeedback onPress={() => this.addRateButton()}>
+			    	<View style={styles.buttonSave} ref="buttonNew">
+			    		<Text style={{fontFamily : 'gothic', color : '#FFF', fontSize : 14}}>Add Rate</Text>
+			    	</View>
+			    </TouchableWithoutFeedback>
+			)
+		}
+	}
+
+	_cancelAddRate(){
+		this.setState({
+			showRateForm : false
+		})
+	}
+
+	_addNewRate(){
+		this.setState({
+			preloadSaveRate : true
+		});
+
+		var dataRate = {
+			"FromDate" : this.state.siteInputRateFrom,
+			"ToDate" : this.state.siteInputRateTo,
+			"Rate" : this.state.siteInputRateValue,
+			"Memo" : '',
+			"RateTypeID" : this.state.siteInputRateTypeID,
+			"PropertyID" : this.state.siteID
+		};
+
+		var request = new Request(CONSTANT.API_URL+'propertyRate/save', {
+			method : 'POST',
+			headers : {
+				'Content-Type' : 'application/json',
+				'Authorization' : this.state.access_token
+			},
+			body : JSON.stringify(dataRate)
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				// console.log(response);
+				dataRate['ID'] = response.Data;
+
+				this.state.rateFormArr.push(dataRate);
+				this.setState({
+					rateFormArr : rateFormArr,
+					showRateForm : false,
+					preloadSaveRate : false
+				});
+
+			})
+			.catch((err) => {
+				this.setState({
+					preloadSaveRate : false
+				});
+				console.log('error',err);
+				alert('Failed to save new Property Rate');
+			})
+	}
+
+	addRateButton(){
+		if(this.state.siteID){
+			this.setState({
+				showRateForm : true
+			});
+		}else{
+			alert('You must add site info first');
+		}
+	}
+
 	handleChangeTab({i, ref, from}){
-		if(i == 2){
-			// console.log(this.state.closureFormArr)
-			closureFormArr = this.state.closureFormArr;
-			// this.renderClosure(closureFormArr);
+		// if(i == 2){
+		// 	// console.log(this.state.closureFormArr)
+		// 	closureFormArr = this.state.closureFormArr;
+		// 	// this.renderClosure(closureFormArr);
+		// }
+
+		switch(i){
+			case 2 :
+				closureFormArr = this.state.closureFormArr;
+			break;
+
+			// case 3 : 
+			// 	this._getRateType();
+			// 	break;
+			// default:
+			// 	this._getRateType();
+			// 	break;
 		}
 	}
 
@@ -1749,6 +2356,11 @@ class SiteForm extends Component{
 					viewModal={this.state.showPickerAmenityType}
 					data={this.state.amenityTypeData}
 					onDataChoose={(data) => this.chooseAmenityType(data)}/>
+
+				<ModalSelect 
+					viewModal={this.state.showPickerRateType}
+					data={this.state.rateTypeData}
+					onDataChoose={(data) => this.chooseRateType(data)}/>
 
 
 				<ScrollTabView
@@ -1805,6 +2417,25 @@ class SiteForm extends Component{
 
 							{
 								this.renderClosureButton()
+							}
+							
+						</View>
+					</ScrollView>
+
+					<ScrollView
+						tabLabel="RATE"
+						key={3}
+						style={styles.scrollbarView}	
+						showsVerticalScrollIndicator={true}>
+
+						{this.preloadSave(this.state.preloadSaveRate)}
+						<View style={styles.containerContent}>
+							{
+								this.renderRate(this.state.rateFormArr)
+							}
+
+							{
+								this.renderRateButton()
 							}
 							
 						</View>
