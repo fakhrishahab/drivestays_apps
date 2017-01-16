@@ -11,7 +11,7 @@ import {
 import Home from './home';
 import Login from './login';
 import Register from './register';
-import Notification from './mySite';
+import Notification from './myBooking';
 import DataStore from '../stores/dataStore';
 import AccessToken from '../accessToken';
 

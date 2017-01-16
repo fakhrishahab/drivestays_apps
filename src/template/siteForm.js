@@ -43,6 +43,7 @@ var index = 1;
 let amenityFormArr = [];
 let closureFormArr = [];
 let rateFormArr = [];
+let pictureFormArr = [];
 
 class SiteForm extends Component{
 	constructor(props) {
@@ -55,6 +56,7 @@ class SiteForm extends Component{
 	  		preloadSaveAmenities : false,
 	  		preloadSaveClosure : false,
 	  		preloadSaveRate : false,
+	  		preloadSavePictures : false,
 	  		siteID : (this.props.data.siteID) ? this.props.data.siteID : null,
 	  		// vehicleID : 126,
 	  		// siteID : 330,
@@ -479,7 +481,7 @@ class SiteForm extends Component{
 				return response.json();
 			})
 			.then((response) => {
-				// console.log(response.Data)
+				console.log(response.Data)
 				this.setState({
 					siteInputAddress1 : response.Data.AddressLine1,
 					siteInputAddress2 : (response.Data.AddressLine2) ? response.Data.AddressLine2 : '',
@@ -1565,7 +1567,7 @@ class SiteForm extends Component{
 			'Are you sure want to delete this data?',
 			[
 				{ text : 'Sure', onPress : () => this._doDeleteClosure(index)},
-				{ text : 'No', onPress : console.log('cancel delete') }
+				{ text : 'No', onPress : () => console.log('cancel delete') }
 			]
 		);
 	}
@@ -1824,156 +1826,158 @@ class SiteForm extends Component{
 			})
 	}
 
-	renderRate(rateFormArr){
-		return(
-			rateFormArr.map((key, index) => {
-				
-				return(
-					<View key={index} style={styles.closureEditForm}>
-						<View style={styles.inputGroupHorizontal} >
-							<ScrollView style={styles.inputGroupLong}
+	renderRate(rateFormArr, rateTypeData){
+		if(rateTypeData.length >= 1){
+			return(
+				rateFormArr.map((key, index) => {
+					
+					return(
+						<View key={index} style={styles.closureEditForm}>
+							<View style={styles.inputGroupHorizontal} >
+								<ScrollView style={styles.inputGroupLong}
+						      		showsVerticalScrollIndicator={false}
+						      		scrollEnabled={false}>
+							        <TextField
+							            label={'Rate Type'}
+										highlightColor={styleVar.colors.secondary}
+										editable={false}
+										textColor={styleVar.colors.black}
+										labelColor={styleVar.colors.primary}
+										dense={true}
+										value={_.findWhere(rateTypeData, {ID : key.RateTypeID}).Description}
+										onFocus={() => this.openRateTypeSelect(index)}
+										blurOnSubmit={true}
+										onChangeText={() => this.refs.EffectiveFromRateUpdate.focus()}
+										autoGrow={true}
+										labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+										inputStyle={{fontFamily : 'gothic'}}/>
+
+							        <Icon name="arrow-drop-down" size={30} color={styleVar.colors.primary} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+					      		</ScrollView>
+				      		</View>
+
+				      		<View style={styles.inputGroupHorizontal} >
+								<ScrollView style={[styles.inputGroupMiddle]}
 					      		showsVerticalScrollIndicator={false}
 					      		scrollEnabled={false}>
-						        <TextField
-						            label={'Rate Type'}
-									highlightColor={styleVar.colors.secondary}
-									editable={false}
-									textColor={styleVar.colors.black}
-									labelColor={styleVar.colors.primary}
-									dense={true}
-									value={_.findWhere(this.state.rateTypeData, {ID : key.RateTypeID}).Description}
-									onFocus={() => this.openRateTypeSelect(index)}
-									blurOnSubmit={true}
-									onChangeText={() => this.refs.EffectiveFromRateUpdate.focus()}
-									autoGrow={true}
-									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
-									inputStyle={{fontFamily : 'gothic'}}/>
+							        <TextField
+							            label={'Effective From'}
+										highlightColor={styleVar.colors.secondary}
+										editable={false}
+										textColor={styleVar.colors.black}
+										labelColor={styleVar.colors.primary}
+										dense={true}
+										ref="EffectiveFromRateUpdate"
+										keyboardType={'numeric'}
+										value={moment(this.state.rateFormArr[index].FromDate).format('YYYY-MM-DD')}
+										onFocus={this.showDatePickerRate.bind(this, 'siteInputRateFromUpdate', {
+											date : new Date(moment(this.state.rateFormArr[index].FromDate).format('YYYY-MM-DD')),
+								          	minDate : new Date(),
+								          	maxDate : new Date(moment(this.state.rateFormArr[index].ToDate).format('YYYY-MM-DD')),
+								          	mode : 'spinner',
+								          	type : 'update',
+								          	index : index
+								        })}
+										blurOnSubmit={true}
+										labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+										inputStyle={{fontFamily : 'gothic'}}/>
 
-						        <Icon name="arrow-drop-down" size={30} color={styleVar.colors.primary} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
-				      		</ScrollView>
-			      		</View>
+										<Icon name="event-available" size={30} color={styleVar.colors.greyDark} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+					      		</ScrollView>
 
-			      		<View style={styles.inputGroupHorizontal} >
-							<ScrollView style={[styles.inputGroupMiddle]}
-				      		showsVerticalScrollIndicator={false}
-				      		scrollEnabled={false}>
-						        <TextField
-						            label={'Effective From'}
-									highlightColor={styleVar.colors.secondary}
-									editable={false}
-									textColor={styleVar.colors.black}
-									labelColor={styleVar.colors.primary}
-									dense={true}
-									ref="EffectiveFromRateUpdate"
-									keyboardType={'numeric'}
-									value={moment(this.state.rateFormArr[index].FromDate).format('YYYY-MM-DD')}
-									onFocus={this.showDatePickerRate.bind(this, 'siteInputRateFromUpdate', {
-										date : new Date(moment(this.state.rateFormArr[index].FromDate).format('YYYY-MM-DD')),
-							          	minDate : new Date(),
-							          	maxDate : new Date(moment(this.state.rateFormArr[index].ToDate).format('YYYY-MM-DD')),
-							          	mode : 'spinner',
-							          	type : 'update',
-							          	index : index
-							        })}
-									blurOnSubmit={true}
-									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
-									inputStyle={{fontFamily : 'gothic'}}/>
+					      		<ScrollView style={[styles.inputGroupMiddle, {marginLeft : 10}]}
+					      		showsVerticalScrollIndicator={false}
+					      		scrollEnabled={false}>
+							        <TextField
+							            label={'Effective To'}
+										highlightColor={styleVar.colors.secondary}
+										editable={false}
+										textColor={styleVar.colors.black}
+										labelColor={styleVar.colors.primary}
+										dense={true}
+										ref="EffectiveToRateUpdate"
+										keyboardType={'numeric'}
+										value={moment(this.state.rateFormArr[index].ToDate).format('YYYY-MM-DD')}
+										onFocus={this.showDatePickerRate.bind(this, 'siteInputRateToUpdate', {
+											date: new Date(moment(this.state.rateFormArr[index].ToDate).format('YYYY-MM-DD')),
+								          	minDate : new Date(moment(this.state.rateFormArr[index].FromDate).format('YYYY-MM-DD')),
+								          	type : 'update',
+								          	index : index
+								        })}
+										blurOnSubmit={true}
+										autoGrow={true}
+										labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+										inputStyle={{fontFamily : 'gothic'}}/>
+										<Icon name="event-available" size={30} color={styleVar.colors.greyDark} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
+					      		</ScrollView>
+							</View>
 
-									<Icon name="event-available" size={30} color={styleVar.colors.greyDark} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
-				      		</ScrollView>
+							<View style={styles.inputGroupHorizontal} >
+								<ScrollView style={[styles.inputGroupMiddle]}
+					      		showsVerticalScrollIndicator={true}
+					      		scrollEnabled={true}>
+							        <TextField
+							            label={'Rate ($)'}
+										highlightColor={styleVar.colors.secondary}
+										editable={true}
+										textColor={styleVar.colors.black}
+										labelColor={styleVar.colors.primary}
+										dense={true}
+										keyboardType={'numeric'}
+										multiline={false}
+										value={this.state.rateFormArr[index].Rate.toString()}
+										onChangeText={(value) => this.state.rateFormArr[index].Rate = parseInt(value) }
+										blurOnSubmit={true}
+										autoGrow={true}
+										labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+										inputStyle={{fontFamily : 'gothic'}}/>
+					      		</ScrollView>
 
-				      		<ScrollView style={[styles.inputGroupMiddle, {marginLeft : 10}]}
-				      		showsVerticalScrollIndicator={false}
-				      		scrollEnabled={false}>
-						        <TextField
-						            label={'Effective To'}
-									highlightColor={styleVar.colors.secondary}
-									editable={false}
-									textColor={styleVar.colors.black}
-									labelColor={styleVar.colors.primary}
-									dense={true}
-									ref="EffectiveToRateUpdate"
-									keyboardType={'numeric'}
-									value={moment(this.state.rateFormArr[index].ToDate).format('YYYY-MM-DD')}
-									onFocus={this.showDatePickerRate.bind(this, 'siteInputRateToUpdate', {
-										date: new Date(moment(this.state.rateFormArr[index].ToDate).format('YYYY-MM-DD')),
-							          	minDate : new Date(moment(this.state.rateFormArr[index].FromDate).format('YYYY-MM-DD')),
-							          	type : 'update',
-							          	index : index
-							        })}
-									blurOnSubmit={true}
-									autoGrow={true}
-									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
-									inputStyle={{fontFamily : 'gothic'}}/>
-									<Icon name="event-available" size={30} color={styleVar.colors.greyDark} style={{position: 'absolute', right: 0,bottom:10}}></Icon>
-				      		</ScrollView>
+					      		<ScrollView style={[styles.inputGroupMiddle]}
+					      		showsVerticalScrollIndicator={true}
+					      		scrollEnabled={true}>
+							        <TextField
+							            label={'Weekend Surcharge'}
+										highlightColor={styleVar.colors.secondary}
+										editable={true}
+										textColor={styleVar.colors.black}
+										labelColor={styleVar.colors.primary}
+										dense={true}
+										keyboardType={'numeric'}
+										multiline={false}
+										value=''
+										onChangeText={(value) => console.log(value) }
+										blurOnSubmit={true}
+										autoGrow={true}
+										labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+										inputStyle={{fontFamily : 'gothic'}}/>
+					      		</ScrollView>
+				      		</View>
+
+				      		<View style={styles.inputGroupHorizontal} >
+					      		<TouchableWithoutFeedback onPress={() => {this._updateRate(index)}}>
+					      			<View style={[styles.inputGroupShort, {justifyContent : 'center', alignItems : 'center', backgroundColor : styleVar.colors.secondary}]}>
+					      				<View>
+					      					<Text style={{color : 'white', fontFamily : 'gothic'}}>Edit</Text>
+					      				</View>
+					      			</View>
+					      		</TouchableWithoutFeedback>
+						      	
+					      		<TouchableWithoutFeedback onPress={() => {this._deleteRate(index)}}>
+
+						      		<View style={[styles.inputGroupShort, {justifyContent : 'center', alignItems : 'center', backgroundColor : styleVar.colors.greyPrimary}]}>
+					      				<View>
+					      					<Text style={{color : 'white', fontFamily : 'gothic'}}>Delete</Text>
+					      				</View>
+						      		</View>
+					      		</TouchableWithoutFeedback>
+						    </View>		
+
 						</View>
-
-						<View style={styles.inputGroupHorizontal} >
-							<ScrollView style={[styles.inputGroupMiddle]}
-				      		showsVerticalScrollIndicator={true}
-				      		scrollEnabled={true}>
-						        <TextField
-						            label={'Rate ($)'}
-									highlightColor={styleVar.colors.secondary}
-									editable={true}
-									textColor={styleVar.colors.black}
-									labelColor={styleVar.colors.primary}
-									dense={true}
-									keyboardType={'numeric'}
-									multiline={false}
-									value={this.state.rateFormArr[index].Rate.toString()}
-									onChangeText={(value) => this.state.rateFormArr[index].Rate = parseInt(value) }
-									blurOnSubmit={true}
-									autoGrow={true}
-									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
-									inputStyle={{fontFamily : 'gothic'}}/>
-				      		</ScrollView>
-
-				      		<ScrollView style={[styles.inputGroupMiddle]}
-				      		showsVerticalScrollIndicator={true}
-				      		scrollEnabled={true}>
-						        <TextField
-						            label={'Weekend Surcharge'}
-									highlightColor={styleVar.colors.secondary}
-									editable={true}
-									textColor={styleVar.colors.black}
-									labelColor={styleVar.colors.primary}
-									dense={true}
-									keyboardType={'numeric'}
-									multiline={false}
-									value=''
-									onChangeText={(value) => console.log(value) }
-									blurOnSubmit={true}
-									autoGrow={true}
-									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
-									inputStyle={{fontFamily : 'gothic'}}/>
-				      		</ScrollView>
-			      		</View>
-
-			      		<View style={styles.inputGroupHorizontal} >
-				      		<TouchableWithoutFeedback onPress={() => {this._updateRate(index)}}>
-				      			<View style={[styles.inputGroupShort, {justifyContent : 'center', alignItems : 'center', backgroundColor : styleVar.colors.secondary}]}>
-				      				<View>
-				      					<Text style={{color : 'white', fontFamily : 'gothic'}}>Edit</Text>
-				      				</View>
-				      			</View>
-				      		</TouchableWithoutFeedback>
-					      	
-				      		<TouchableWithoutFeedback onPress={() => {this._deleteRate(index)}}>
-
-					      		<View style={[styles.inputGroupShort, {justifyContent : 'center', alignItems : 'center', backgroundColor : styleVar.colors.greyPrimary}]}>
-				      				<View>
-				      					<Text style={{color : 'white', fontFamily : 'gothic'}}>Delete</Text>
-				      				</View>
-					      		</View>
-				      		</TouchableWithoutFeedback>
-					    </View>		
-
-					</View>
-				)
-			})
-		)
+					)
+				})
+			)
+		}
 	}
 
 	_updateRate(index){
@@ -2315,24 +2319,91 @@ class SiteForm extends Component{
 		}
 	}
 
-	handleChangeTab({i, ref, from}){
-		// if(i == 2){
-		// 	// console.log(this.state.closureFormArr)
-		// 	closureFormArr = this.state.closureFormArr;
-		// 	// this.renderClosure(closureFormArr);
-		// }
+	renderPicture(data){
 
+	}
+
+	renderPictureButton(){
+
+	}
+
+	uploadPicture(){
+		const options = {
+    		quality : 1.0,
+    		maxWidth :500,
+    		maxHeight : 500,
+    		storageOptions : {
+    			skipBackup : true
+    		}
+    	};
+
+    	ImagePicker.showImagePicker(options, (response) => {
+    		// console.log('Repsonse', response)
+
+    		if(response.didCancel){
+    			console.log('User cancelled photo picker')
+    		}
+    		else if(response.error){
+    			console.log('Image Picker Error', response.error)
+    		}
+    		else if(response.customButton){
+    			console.log('User tapped custom button', response.customButton)
+    		}
+    		else{
+    			var source;
+
+    			// console.log(response)
+
+    			var photo = {
+					uri: response.uri,
+					type: response.type,
+					name: response.fileName,
+				};
+				// console.log(photo)
+    			if(Platform.OS == 'android'){
+    				source = { uri : response.uri, isStatic : true};
+    			}else{
+    				source = { uri : response.uri.replace('file://', ''), isStatic : true};
+    			}
+
+    			this.setState({
+    				avatarSource : source,
+    				// preloadSavePictures : true
+    			})
+
+    			console.log(photo)
+
+    			// var newPhoto = {
+    			// 	ID : 199,
+    			// 	Path : 
+    			// 	Memo
+    			// 	Profile
+    			// 	PropertyID
+    			// };
+
+    			// this._doUploadPicture(photo);
+    		}
+    	})
+	}
+
+	renderPropertyPictures(propertyPictures){
+		return(
+			propertyPictures.map((key, index) => {
+				console.log(CONSTANT.WEB_URL+key.Path);
+				return(
+					<TouchableWithoutFeedback key={index}>
+						<Image source={{uri : CONSTANT.WEB_URL+key.Path}} style={styles.imageFlex}/>
+					</TouchableWithoutFeedback>
+				)
+			})
+		)
+	}
+
+	handleChangeTab({i, ref, from}){
 		switch(i){
 			case 2 :
 				closureFormArr = this.state.closureFormArr;
 			break;
-
-			// case 3 : 
-			// 	this._getRateType();
-			// 	break;
-			// default:
-			// 	this._getRateType();
-			// 	break;
 		}
 	}
 
@@ -2431,11 +2502,41 @@ class SiteForm extends Component{
 						{this.preloadSave(this.state.preloadSaveRate)}
 						<View style={styles.containerContent}>
 							{
-								this.renderRate(this.state.rateFormArr)
+								this.renderRate(this.state.rateFormArr, this.state.rateTypeData)
 							}
 
 							{
 								this.renderRateButton()
+							}
+							
+						</View>
+					</ScrollView>
+
+					<ScrollView
+						tabLabel="PICTURES"
+						key={4}
+						style={styles.scrollbarView}	
+						showsVerticalScrollIndicator={true}>
+
+						{this.preloadSave(this.state.preloadSavePictures)}
+						<View style={styles.containerContent}>
+							{
+								//this.renderPicture(this.state.propertyPictures)
+							}
+
+							<View style={styles.imageContainer}>
+
+								{this.renderPropertyPictures(this.state.propertyPictures)}
+								
+								<TouchableWithoutFeedback onPress={this.uploadPicture.bind(this)}>
+									<View style={styles.imageFlexWrapper}>
+										<Icon name='add-a-photo' size={50} color={styleVar.colors.greyDark}/>
+									</View>
+								</TouchableWithoutFeedback>
+							</View>
+							
+							{
+								this.renderPictureButton()
 							}
 							
 						</View>

@@ -43,10 +43,11 @@ module.exports = {
 	},
 	requestItemDescWrapper : {
 		paddingLeft : 10,
+		flexWrap : 'wrap',
 	},
 	itemDescTitle : {
 		color : styleVar.colors.primary,
-		fontWeight : 'bold'
+		fontWeight : 'bold',
 	},
 	requestItemActionButton : {
 		// flex: 1,

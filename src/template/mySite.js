@@ -100,6 +100,7 @@ class MySite extends Component{
     			return response.json()
     		})
     		.then((response) => {
+    			dataSiteArr = [];
     			// console.log(response)
     			response.Data.map((key) => {
     				dataSiteArr.push(key)

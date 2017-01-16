@@ -184,5 +184,32 @@ module.exports = {
 		borderStyle : 'solid',
 		borderWidth : 1,
 		borderColor : '#CCC'
+	},
+	imageContainer : {
+		left : 0,
+		right : 0,
+		top: 0,
+		bottom : 0,
+		borderStyle : 'solid',
+		borderColor : 'red',
+		borderWidth : 1,
+		flex:0,
+		width : screenWidth - 20,
+		flexWrap : 'wrap',
+		alignItems : 'flex-start',
+	    justifyContent: 'space-between',
+	    flexDirection : 'row'
+	},
+	imageFlexWrapper : {
+		height : screenWidth / 2 - 15,
+		width : screenWidth / 2 - 15 ,
+		alignItems : 'center',
+		justifyContent : 'center',
+		backgroundColor : styleVar.colors.greySecondary
+	},
+	imageFlex : {
+		height : screenWidth / 2 - 15,
+		width : screenWidth / 2 - 15,
+		marginBottom : 8
 	}
 }
