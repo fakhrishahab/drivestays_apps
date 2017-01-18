@@ -1470,27 +1470,28 @@ class SiteForm extends Component{
 				      		</ScrollView>
 
 						</View>
-						<View style={styles.inputGroupHorizontal} >
-							<ScrollView style={[styles.inputGroupMiddle]}
-				      		showsVerticalScrollIndicator={true}
-				      		scrollEnabled={true}>
-						        <TextField
-						            label={'Description'}
-									highlightColor={styleVar.colors.secondary}
-									editable={true}
-									textColor={styleVar.colors.black}
-									labelColor={styleVar.colors.primary}
-									dense={true}
-									keyboardType={'default'}
-									multiline={false}
-									value={data.Description}
-									onChangeText={(value) => this.state.closureFormArr[index].Description = value }
-									blurOnSubmit={true}
-									autoGrow={true}
-									labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
-									inputStyle={{fontFamily : 'gothic'}}/>
-				      		</ScrollView>
-				      	</View>
+						
+						<ScrollView style={{flex : 1,paddingLeft : 0,paddingVertical : -5,}}
+			      		showsVerticalScrollIndicator={true}
+			      		scrollEnabled={true}>
+					        <TextField
+					            label={'Description'}
+								highlightColor={styleVar.colors.secondary}
+								editable={true}
+								height={45}
+								textColor={styleVar.colors.black}
+								labelColor={styleVar.colors.primary}
+								dense={true}
+								keyboardType={'default'}
+								multiline={true}
+								value={data.Description}
+								onChangeText={(value) => this.state.closureFormArr[index].Description = value }
+								blurOnSubmit={true}
+								autoGrow={true}
+								labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
+								inputStyle={{fontFamily : 'gothic'}}/>
+			      		</ScrollView>
+				      	
 
 				      	<View style={styles.inputGroupHorizontal} >
 				      		<TouchableWithoutFeedback onPress={() => {this._updateClosure(index)}}>
@@ -1674,8 +1675,7 @@ class SiteForm extends Component{
 			      		</ScrollView>
 
 					</View>
-					<View style={styles.inputGroupHorizontal} >
-						<ScrollView style={[styles.inputGroupMiddle]}
+						<ScrollView style={{flex : 1,paddingLeft : 0,paddingVertical : -5,}}
 			      		showsVerticalScrollIndicator={true}
 			      		scrollEnabled={true}>
 					        <TextField
@@ -1685,8 +1685,9 @@ class SiteForm extends Component{
 								textColor={styleVar.colors.black}
 								labelColor={styleVar.colors.primary}
 								dense={true}
+								height={45}
 								keyboardType={'default'}
-								multiline={false}
+								multiline={true}
 								value={this.state.siteInputClosureDesc}
 								onChangeText={(value) => this.setState({siteInputClosureDesc : value}) }
 								blurOnSubmit={true}
@@ -1694,7 +1695,6 @@ class SiteForm extends Component{
 								labelStyle={{fontFamily : 'gothic', color : styleVar.colors.primary}}
 								inputStyle={{fontFamily : 'gothic'}}/>
 			      		</ScrollView>
-			      	</View>
 
 			      	<View style={styles.inputGroupHorizontal} >
 			      		<TouchableWithoutFeedback onPress={() => {this._addNewClosure()}}>

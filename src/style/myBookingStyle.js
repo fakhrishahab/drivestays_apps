@@ -28,6 +28,12 @@ module.exports = {
 		marginBottom : 10,
 		padding : 10
 	},
+	requestItemWrapperNull : {
+		left:0,
+		right : 0,
+		alignItems : 'center',
+		padding : 10
+	},
 	requestItemName : {
 		marginBottom : 10
 	},
@@ -52,19 +58,41 @@ module.exports = {
 	requestItemActionButton : {
 		// flex: 1,
 		flexDirection : 'row',
-		alignItems : 'flex-start',
-		justifyContent : 'space-around',
+		alignItems : 'center',
+		justifyContent : 'space-between',
 		marginTop : 10,
 	},
 	requestButton : {
 		padding: 10,
-		flexWrap : "wrap",
-		borderRadius : 3
+		borderRadius : 3,
+		alignSelf : 'flex-start'
 	},
 	buttonPrimary : {
 		backgroundColor : styleVar.colors.primaryDark
 	},
 	buttonSecondary : {
 		backgroundColor : styleVar.colors.secondary
+	},
+	containerModal : {
+		position:'absolute',
+		flex:1, 
+		flexDirection : 'row',
+		backgroundColor : 'rgba(0,0,0,0.7)', 
+		alignItems :'center', 
+		justifyContent:'center', 
+		left:0, 
+		right:0, 
+		top :0, 
+		bottom:0, 
+		padding : 20,
+		zIndex : 4
+	},
+	containerLoading : {
+		flex:1, 
+		backgroundColor : '#FFF', 
+		borderRadius : 5, 
+		alignItems : 'center', 
+		padding: 10,
+		elevation : 8
 	}
 }
