@@ -36,6 +36,7 @@ const propTypes = {
 }
 
 var dataMessageThread = [];
+var messageThreadsArr = [];
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
 class MessageThread extends Component{
@@ -45,6 +46,7 @@ class MessageThread extends Component{
 	
 	  	this.state = {
 	  		renderPlaceholderOnly : true,
+	  		preloadShow : true,
 		  	headerColor : '#FFF',
 		  	dataSource: ds.cloneWithRows([]),
 		  	messageData : [],
@@ -61,10 +63,12 @@ class MessageThread extends Component{
 			offset : 0,
 			preload : true,
 			loadMore : false,
+			loadMoreShow : false,
 			autoScroll : true,
 			messageText : '',
 			scrollHeight : 0,
-			doAutomaticScroll : false
+			doAutomaticScroll : false,
+			messageThreadsArr : []
 	  	};
 	  	this.onNextPage = this.onNextPage.bind(this);
 
@@ -104,24 +108,28 @@ class MessageThread extends Component{
     	})
     }
 
-    preload(){
-		return(
-			<View style={styles.containerContent}>
-				<ActivityIndicator
-			        animating={this.state.progressAnimate}
-			        style={[styles.centering, {height: 100}]}
-			        size="large"
-			        color={styleVar.colors.primary}
-			    />
-			</View>
-		)
+    preload(status){
+    	if(status){
+    		return(
+				<View>
+					<ActivityIndicator
+				        animating={this.state.progressAnimate}
+				        style={[styles.centering, {height: 100}]}
+				        size="large"
+				        color={styleVar.colors.primary}
+				    />
+				</View>
+			)
+    	}else{
+    		return <View></View>
+    	}
 	}
 
-	_requestMessageThread(){
+	_requestMessageThread(loadMore){
 		this.setState({
 			loadMore : false
 		})
-		// console.log(CONSTANT.API_URL+'messagethreads/get?messageID='+this.state.MessageID+'&offset='+this.state.viewedMessage+'&limit='+this.state.limit)
+		console.log(CONSTANT.API_URL+'messagethreads/get?messageID='+this.state.MessageID+'&offset='+this.state.viewedMessage+'&limit='+this.state.limit)
 		var request = new Request(CONSTANT.API_URL+'messagethreads/get?messageID='+this.state.MessageID+'&offset='+this.state.viewedMessage+'&limit='+this.state.limit, {
 			method : 'GET',
 			headers : {
@@ -135,29 +143,57 @@ class MessageThread extends Component{
 				return response.json();
 			})
 			.then((response) => {
-				response.Data.map((key) => {
-					dataMessageThread.push(key)	
-				})
-				
-				// console.log(_.sortBy(dataMessageThread, 'DateCreated'))
-				// console.log(response.Data)
-				this.setState({
-					messageData : _.sortBy(dataMessageThread, 'DateCreated'),
-					dataSource : this.state.dataSource.cloneWithRows(_.sortBy(dataMessageThread, 'DateCreated')),
-					totalMessage : response.Data.Length,
-					viewedMessage : parseInt(this.state.viewedMessage + response.Data.length),
-					preload : false,
-				});
+				console.log(response)
 
-				if(response.Data.length < this.state.limit || response.Data.length == 0){
+				response.Data.MessageThreads.map((key, index) => {
+					messageThreadsArr.unshift(key);
+				})
+
+				// console.log(messageThreadsArr)
+
+				this.setState({
+					messageThreadsArr : messageThreadsArr,
+					totalMessage : response.Data.Total,
+					viewedMessage : parseInt(this.state.viewedMessage + response.Data.MessageThreads.length),
+					preloadShow : false,
+					loadMoreShow : false,
+				})
+
+				// response.Data.MessageThreads.map((key) => {
+				// 	dataMessageThread.push(key)	
+				// })
+				
+				// // console.log(_.sortBy(dataMessageThread, 'DateCreated'))
+				// // console.log(response.Data)
+				// this.setState({
+
+				// 	messageData : _.sortBy(dataMessageThread, 'DateCreated'),
+				// 	dataSource : this.state.dataSource.cloneWithRows(_.sortBy(dataMessageThread, 'DateCreated')),
+				// 	totalMessage : response.Data.Length,
+				// 	viewedMessage : parseInt(this.state.viewedMessage + response.Data.length),
+				// 	preload : false,
+				// });
+
+				if(response.Data.Total <= this.state.viewedMessage){
 					this.setState({
-						loadMore : false
+						loadMore : false,
+						loadMoreShow : false
 					})
 				}else{
 					this.setState({
 						loadMore : true
 					})
 				}
+
+				// if(response.Data.Total < this.state.limit || response.Data.length == 0){
+				// 	this.setState({
+				// 		loadMore : false
+				// 	})
+				// }else{
+				// 	this.setState({
+				// 		loadMore : true
+				// 	})
+				// }
 			})
 			.catch((err) => {
 				console.log('error', err)
@@ -170,84 +206,131 @@ class MessageThread extends Component{
     }
 
     viewListMessage(data){
-    	if(data.Self){
-    		return(
-    			<View style={styles.bubbleRight}>    
-			        <View style={[styles.messageBubbleRight]}>
-			          	<Text style={[styles.messageContent, styles.right]}>
-			            	{data.Text}
-			          	</Text>
-			          	<Text style={[styles.messageDate, styles.right]}>
-			          		{moment.utc(data.DateCreated).format('MMM, DD YYYY H:m:s')}
-			          	</Text>
-			        </View>
-			    </View>
-    		)
-    	}else if(data.FromUserID == 0){
-    		return(
-			   	<View style={styles.bubbleCenter}>    
-			        <View style={styles.messageSystem}>
-			          	<Text>
-			            	{data.Text}
-			          	</Text>
-			          	<Text>
-			          		{moment.utc(data.DateCreated).format('MMM, DD YYYY H:m:s')}
-			          	</Text>
-			        </View>
-			    </View>
-    		)
-    	}else{
-    		return(
-			   	<View style={styles.bubbleLeft}>    
-			        <View style={styles.messageBubbleLeft}>
-			          	<Text style={[styles.messageContent]}>
-			            	{data.Text}
-			          	</Text>
-			          	<Text style={[styles.messageDate]}>
-			          		{moment.utc(data.DateCreated).format('MMM, DD YYYY H:m:s')}
-			          	</Text>
-			        </View>
-			    </View>
-    		)
-    	}
+    	// if(data.Self){
+    	// 	return(
+    	// 		<View style={styles.bubbleRight}>    
+			  //       <View style={[styles.messageBubbleRight]}>
+			  //         	<Text style={[styles.messageContent, styles.right]}>
+			  //           	{data.Text}
+			  //         	</Text>
+			  //         	<Text style={[styles.messageDate, styles.right]}>
+			  //         		{moment.utc(data.DateCreated).format('MMM, DD YYYY H:m:s')}
+			  //         	</Text>
+			  //       </View>
+			  //   </View>
+    	// 	)
+    	// }else if(data.FromUserID == 0){
+    	// 	return(
+			  //  	<View style={styles.bubbleCenter}>    
+			  //       <View style={styles.messageSystem}>
+			  //         	<Text>
+			  //           	{data.Text}
+			  //         	</Text>
+			  //         	<Text>
+			  //         		{moment.utc(data.DateCreated).format('MMM, DD YYYY H:m:s')}
+			  //         	</Text>
+			  //       </View>
+			  //   </View>
+    	// 	)
+    	// }else{
+    	// 	return(
+			  //  	<View style={styles.bubbleLeft}>    
+			  //       <View style={styles.messageBubbleLeft}>
+			  //         	<Text style={[styles.messageContent]}>
+			  //           	{data.Text}
+			  //         	</Text>
+			  //         	<Text style={[styles.messageDate]}>
+			  //         		{moment.utc(data.DateCreated).format('MMM, DD YYYY H:m:s')}
+			  //         	</Text>
+			  //       </View>
+			  //   </View>
+    	// 	)
+    	// }
     }
 
 
-    _renderMessageList(){
-    	if(this.state.preload){
-    		return(
-    			<View style={styles.loadingContentWrapper}>
-					<ActivityIndicator
-				        animating={this.state.progressAnimate}
-				        style={[styles.centering, {height: 100}]}
-				        size="large"
-				        color={styleVar.colors.primary}
-				    />
-				</View>
-    		)
-    	}else{
-    		return(
-	    		<ListView
-	    			dataSource={this.state.dataSource}
-	    			enableEmptySections={true}
-	    			renderRow={(rowData) => 
-	    				<View>
-	    				{this.viewListMessage(rowData)}
-	    				</View>
-	    			}/>
-	    	)
-    	}
+    // _renderMessageList(){
+    // 	if(this.state.preload){
+    // 		return(
+    // 			<View style={styles.loadingContentWrapper}>
+				// 	<ActivityIndicator
+				//         animating={this.state.progressAnimate}
+				//         style={[styles.centering, {height: 100}]}
+				//         size="large"
+				//         color={styleVar.colors.primary}
+				//     />
+				// </View>
+    // 		)
+    // 	}else{
+    // 		return(
+	   //  		<ListView
+	   //  			dataSource={this.state.dataSource}
+	   //  			enableEmptySections={true}
+	   //  			renderRow={(rowData) => 
+	   //  				<View>
+	   //  				{this.viewListMessage(rowData)}
+	   //  				</View>
+	   //  			}/>
+	   //  	)
+    // 	}
     	
+    // }
+
+    _renderMessageList(data){
+    	return(
+    		data.map((key, index) => {
+    			if(key.Self){
+					return(
+		    			<View style={styles.bubbleRight} key={index}>    
+					        <View style={[styles.messageBubbleRight]}>
+					          	<Text style={[styles.messageContent, styles.right]}>
+					            	{key.Text}
+					          	</Text>
+					          	<Text style={[styles.messageDate, styles.right]}>
+					          		{moment.utc(key.DateCreated).format('MMM, DD YYYY H:m:s')}
+					          	</Text>
+					        </View>
+					    </View>
+		    		)
+    			}else if(key.FromUserID == 0){
+					return(
+					   	<View style={styles.bubbleCenter} key={index}>    
+					        <View style={styles.messageSystem}>
+					          	<Text>
+					            	{key.Text}
+					          	</Text>
+					          	<Text>
+					          		{moment.utc(key.DateCreated).format('MMM, DD YYYY H:m:s')}
+					          	</Text>
+					        </View>
+					    </View>
+					)
+				}else{
+		    		return(
+					   	<View style={styles.bubbleLeft} key={index}>    
+					        <View style={styles.messageBubbleLeft}>
+					          	<Text style={[styles.messageContent]}>
+					            	{key.Text}
+					          	</Text>
+					          	<Text style={[styles.messageDate]}>
+					          		{moment.utc(key.DateCreated).format('MMM, DD YYYY H:m:s')}
+					          	</Text>
+					        </View>
+					    </View>
+		    		)
+		    	}
+    		})
+    	)
     }
 
     handleScroll(event: Object){
     	// console.log(this.state.loadMore, event.nativeEvent.contentOffset.y)
     	if(this.state.loadMore && event.nativeEvent.contentOffset.y <= 1){
-    		// this.setState({
-    		// 	loadMore : false
-    		// })
+    		this.setState({
+    			loadMoreShow : true
+    		})
     		// console.log('ok load more');
-    		this._requestMessageThread()
+    		this._requestMessageThread(true)
     	}
     	// console.log(event.nativeEvent)
     }
@@ -256,7 +339,7 @@ class MessageThread extends Component{
     	this.setState({
     		scrollHeight : height
     	})
-    	console.log(this.state.messageData.length)
+    	// console.log(this.state.messageData.length)
     	if(this.state.messageData.length <= 10){
     		this.refs.messageList.scrollTo({y : height})	
     	}else if(this.state.doAutomaticScroll){
@@ -276,8 +359,8 @@ class MessageThread extends Component{
     	
     }
 
-    loadMore(){
-    	if(this.state.loadMore){
+    loadMore(status){
+    	if(status){
     		return(
     			<View style={styles.loadingContentWrapper}>
 					<ActivityIndicator
@@ -289,11 +372,12 @@ class MessageThread extends Component{
 				</View>
     		)
     	}else{
-    		return(null)
+    		return <View></View>
     	}
     }
 
     sendMessage(){
+    	this.refs.messageBox.blur();
     	if(this.state.messageText == ''){
     		alert('Please input your message')
     	}else{
@@ -320,15 +404,16 @@ class MessageThread extends Component{
     			return response.json()
     		})
     		.then((response) => {
-    			dataMessageThread.push(response.Data)
+    			console.log(response)
+    // 			dataMessageThread.push(response.Data)
 
-    			this.setState({
-					messageData : _.sortBy(dataMessageThread, 'DateCreated'),
-					dataSource : this.state.dataSource.cloneWithRows(_.sortBy(dataMessageThread, 'DateCreated')),
-					doAutomaticScroll : true,
-					viewedMessage : parseInt(this.state.viewedMessage + 1),
-					messageText : ''
-				})
+    // 			this.setState({
+				// 	messageData : _.sortBy(dataMessageThread, 'DateCreated'),
+				// 	dataSource : this.state.dataSource.cloneWithRows(_.sortBy(dataMessageThread, 'DateCreated')),
+				// 	doAutomaticScroll : true,
+				// 	viewedMessage : parseInt(this.state.viewedMessage + 1),
+				// 	messageText : ''
+				// })
 
 				this.refs.messageList.scrollTo({y : this.contentHeight + 400})
     		})
@@ -364,14 +449,20 @@ class MessageThread extends Component{
 						ref="messageList"
 						onContentSizeChange={(w, h) => {this.contentHeight = h; this.scrollBottom(h)}}
 						onScroll={this.handleScroll.bind(this)}>
-						{this.loadMore()}
-						{this._renderMessageList()}
+						{this.preload(this.state.preloadShow)}
+						{
+							this.loadMore(this.state.loadMoreShow)
+						}
+						{
+							this._renderMessageList(this.state.messageThreadsArr)
+						}
 
 					</ScrollView>
 				</View>
 				<View style={styles.inputContainer}>
 					<TextInput
 						placeholder="Type Your Message Here"
+						ref="messageBox"
 						onChangeText={(text) => this.setState({messageText : text})}
 						value={this.state.messageText}
 						style={styles.messageTextInput}/>

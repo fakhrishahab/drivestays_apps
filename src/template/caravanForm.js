@@ -408,15 +408,15 @@ class CaravanForm extends Component{
 			})
 	}
 
-	_renderVehiclePictures(){
+	_renderVehiclePictures(vehiclePictures){
 		return(				
-			this.state.vehiclePictures.map((key) => {
+			vehiclePictures.map((key, index) => {
 				return (
-					<View key={key.ID} style={styles.uploadedImageWrapper}>
+					<View key={index} style={styles.uploadedImageWrapper}>
 						<Image source={{uri : CONSTANT.WEB_URL+key.Path}} style={styles.uploadedImage} />
 						<View style={styles.imageButtonWrapper}>
-							<Icon name="star" size={25} color={(key.Profile == true) ? styleVar.colors.secondary : '#FFF'} onPress={ ()=> this.setDefaultPicture(key.ID)} style={styles.imageButton}/>
-							<Icon name="delete" size={25} color="#FFF" onPress={ ()=> this.deleteVehiclePicture(key.ID)} style={styles.imageButton}/>
+							<Icon name="star" size={25} color={(key.Profile == true) ? styleVar.colors.secondary : '#FFF'} onPress={ ()=> this.setDefaultPicture(key.ID, index)} style={styles.imageButton}/>
+							<Icon name="delete" size={25} color="#FFF" onPress={ ()=> this.deleteVehiclePicture(key.ID, index)} style={styles.imageButton}/>
 						</View>
 					</View>
 				)
@@ -424,18 +424,92 @@ class CaravanForm extends Component{
 		)
 	}
 
-	setDefaultPicture(id){
+	setDefaultPicture(id, index){
+		this.setState({
+			preloadSaveInfo : true
+		});
+		var request = new Request(CONSTANT.API_URL+'VehiclePicture/makeprofile/'+id, {
+			method : 'POST',
+			headers : {
+				'Authorization' : this.state.access_token
+			}
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				console.log(response);
+				this.state.vehiclePictures.forEach(function(obj){
+					if(obj.ID != id){
+						obj.Profile = false;
+					}else{
+						obj.Profile = true;
+					}
+				})
+				this.setState({
+					preloadSaveInfo : false
+				});
+			})
+			.catch((err) => {
+				console.log('error',err);
+				this.setState({
+					preloadSaveInfo : false
+				});
+			})
 
 	}
 
-	deleteVehiclePicture(id){
-		var index = _.findLastIndex(vehiclePictures, {ID : id})
+	deleteVehiclePicture(id, index){
+		Alert.alert(
+			'Warning',
+			'Are you sure want to delete this picture?',
+			[
+				{ text : 'Sure', onPress : () => this._doDeleteVehiclePicture(id, index)},
+				{ text : 'No', onPress : () => console.log('cancel delete') }
+			]
+		);
+		// var index = _.findLastIndex(vehiclePictures, {ID : id})
 
-		vehiclePictures.splice(index, 1);
+		// vehiclePictures.splice(index, 1);
 
+		// this.setState({
+		// 	vehiclePictures : vehiclePictures
+		// })
+	}
+
+	_doDeleteVehiclePicture(id, index){
 		this.setState({
-			vehiclePictures : vehiclePictures
-		})
+			preloadSaveInfo : true
+		});
+
+		var request = new Request(CONSTANT.API_URL+'VehiclePicture/delete/'+id, {
+			method : 'GET',
+			headers : {
+				'Authorization' : this.state.access_token
+			}
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				console.log(response);
+				this.state.vehiclePictures.splice(index, 1);
+
+				this.setState({
+					preloadSaveInfo : false,
+					vehiclePictures : this.state.vehiclePictures
+				});
+			})
+			.catch((err) => {
+				console.log('error',err);
+				this.setState({
+					preloadSaveInfo : false
+				});
+			})
 	}
 
 	uploadContainer(){
@@ -448,14 +522,23 @@ class CaravanForm extends Component{
 			    	</View>
 			    	<View style={styles.uploadContainerContent}>
 			    		{
-			    			this._renderVehiclePictures()
+			    			this._renderVehiclePictures(this.state.vehiclePictures)
 			    		}
 			    		
-			    		<TouchableWithoutFeedback onPress={this.uploadPicture.bind(this)}>
-			    			<View style={styles.uploadTrigger}>
-			    				<Icon name='add-a-photo' size={50} color={styleVar.colors.greyDark}/>
-			    			</View>
-			    		</TouchableWithoutFeedback>
+			    		{
+			    			(this.state.vehiclePictures.length < 5) ?
+
+			    			<TouchableWithoutFeedback onPress={this.uploadPicture.bind(this)}>
+				    			<View style={styles.uploadTrigger}>
+				    				<Icon name='add-a-photo' size={50} color={styleVar.colors.greyDark}/>
+				    			</View>
+				    		</TouchableWithoutFeedback>
+
+				    		:
+
+				    		false
+			    		}
+			    		
 			    	</View>
 			    </View>	
 			)
@@ -609,7 +692,7 @@ class CaravanForm extends Component{
 			<View style={styles.containerHome}>
 				<View style={[styles.headerModal]}>
 					<Icon name='close' size={30} color="#FFF" onPress={ () => this.backCaravan() }></Icon>
-					<Text style={styles.headerTitle}>Add Vehicle</Text>
+					<Text style={styles.headerTitle}>{(this.state.vehicleID) ? "Edit Vehicle" : "Add Vehicle"}</Text>
 					<Icon name='done' size={30} color="#FFF" onPress={() => this.saveDataVehicle()}/>
 				</View>
 

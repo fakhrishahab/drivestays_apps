@@ -93,5 +93,14 @@ module.exports = {
 	countryListItem : {
 		paddingHorizontal : 10,
 		paddingVertical : 8
-	}	
+	},
+	buttonSave : {
+		left:0,
+		right : 0,
+		padding : 15,
+		borderRadius : 5,
+		marginVertical : 15,
+		alignItems : 'center',
+		backgroundColor : styleVar.colors.secondary
+	},
 };

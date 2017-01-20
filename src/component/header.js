@@ -50,7 +50,7 @@ class Header extends Component{
 	}
 
 	_loadNotification(){
-		console.log('this.state.access_token')
+		// console.log('this.state.access_token')
 		var request = new Request(CONSTANT.API_URL+'messagethreads/notification?offset=0&limit=10', {
 			method : 'GET',
 			headers : {
@@ -69,7 +69,7 @@ class Header extends Component{
 						notifMessage : true
 					})
 				}
-				console.log(response)
+				// console.log(response)
 			})
 			.catch((err) => {
 				console.log('error', err)

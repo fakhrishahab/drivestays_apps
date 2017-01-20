@@ -19,6 +19,7 @@ import DrawerLayout from 'react-native-drawer-layout';
 import ModalSearchAddress from '../component/modalSearchAddress';
 import TextField from 'react-native-md-textinput';
 import styleVar from '../styleVar';
+import moment from 'moment';
 
 import AuthenticationAction from '../actions/authenticationAction';
 import AccessToken from '../accessToken';
@@ -53,7 +54,6 @@ class Home extends Component{
     }
 
     showNotif(type){
-    	console.log('test')
     	this.props.replaceRoute(Routes.link('notification'));
 		// var sceneConfig = Navigator.SceneConfigs.FloatFromBottom;
 	 //    	sceneConfig.gestures.pop.disabled = true;
@@ -86,7 +86,8 @@ class Home extends Component{
     		modalVisible : false,
     		placeAddress : details.placeAddress,
     		geometry : details.placeGeometry
-    	})
+    	});
+    	this.refs.address.blur();
     }
 
     async showPicker(stateKey, options){
@@ -94,21 +95,27 @@ class Home extends Component{
 			var newState = {};
 			const {action, year, month, day} = await DatePickerAndroid.open(options);
 			if (action === DatePickerAndroid.dismissedAction) {
-				newState[stateKey + 'Text'] = 'dismissed';
+				// newState[stateKey + 'Text'] = '';
+				this.refs.arrivalDate.blur();
+				this.refs.departureDate.blur();
 			} else {
 				var date = new Date(year, month, day);
-				newState[stateKey + 'Text'] = date.toLocaleDateString();
-				newState[stateKey + 'Text'] = date.getFullYear() + '-'+ parseInt(date.getMonth()+1) + '-' + date.getDate();
+				// newState[stateKey + 'Text'] = date.toLocaleDateString();
+				// newState[stateKey + 'Text'] = date.getFullYear() + '-'+ parseInt(date.getMonth()+1) + '-' + date.getDate();
+				newState[stateKey + 'Text'] = moment(date).format('YYYY-MM-DD');
+
 				newState[stateKey + 'Date'] = date;
 				
 				if(stateKey == 'arrival'){
 					this.setState({
 						minDate : date
-					})
+					});
+					this.refs.arrivalDate.blur();
 				}else{
 					this.setState({
 						maxDate : date
-					})
+					});
+					this.refs.departureDate.blur();
 				}
 			}
 
@@ -215,7 +222,6 @@ class Home extends Component{
 						          textColor='#FFF'
 						          labelColor='#FFF'
 						          editable={false}
-						          blurOnSubmit={true}
 						          labelStyle={{fontFamily : 'gothic'}}
 						          inputStyle={{fontFamily : 'gothic', paddingLeft: 0}}
 						          value={this.state.placeAddress}
@@ -274,7 +280,7 @@ class Home extends Component{
 				        <View style={styles.inputContainer}>
 					    	<TouchableWithoutFeedback
 					    		onPress={() => this.findSite()}>
-					    		<View style={styles.inputButton}>
+					    		<View style={styles.inputButton} ref="btnSearch">
 					    			<Text style={styles.inputButtonText}>Find Site</Text>
 					    		</View>
 					    	</TouchableWithoutFeedback>

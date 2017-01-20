@@ -31,8 +31,9 @@ class Invoice extends Component{
 			renderPlaceholderOnly : true,
 			progressAnimate : true,
 			preloadSaveInvoice : false,
-			// RequestID : this.props.data.RequestID,
-			RequestID : 77,
+			RequestID : this.props.data.RequestID,
+			statusPaid : (this.props.data.statusPaid) ? this.props.data.statusPaid : false,
+			// RequestID : 77,
 			invoiceData : '',
 			invoiceTotalRateSite : 0,
 			invoiceTotalRate : 0
@@ -248,11 +249,22 @@ class Invoice extends Component{
 						</View>
 					</View>
 
-					<TouchableWithoutFeedback onPress={() => this._doPayment()}>
-						<View style={styles.btnPayment}>
-							<Text style={[styleVar.size.h4, {color : styleVar.colors.white}]}>Pay with Paypal</Text>
+					{
+						(!this.state.statusPaid) ?
+
+						<TouchableWithoutFeedback onPress={() => this._doPayment()}>
+							<View style={styles.btnPayment}>
+								<Text style={[styleVar.size.h4, {color : styleVar.colors.white}]}>Pay with Paypal</Text>
+							</View>
+						</TouchableWithoutFeedback>
+
+						:
+
+						<View style={{padding : 10, alignItems : 'center', backgroundColor : styleVar.colors.secondary}}>
+							<Text style={[styleVar.size.h3, {color : '#FFF', fontWeight : 'bold'}]}>STATUS : PAID</Text>
 						</View>
-					</TouchableWithoutFeedback>
+					}
+					
 
 				</ScrollView>
 			</View>

@@ -32,6 +32,7 @@ import moment from 'moment';
 import styles from '../style/detailSite';
 import AccessToken from '../accessToken';
 import Routes from '../routes';
+import ModalLoading from '../plugin/ModalLoading';
 
 const propTypes = {
   toRoute: PropTypes.func.isRequired,
@@ -49,9 +50,9 @@ class DetailSite extends Component{
 		  	siteId : this.props.data.siteId,
 		  	fromDate : this.props.data.FromDate,
 		  	toDate : this.props.data.ToDate,
-		  	// siteId : 350,
-		  	// fromDate : '2016-11-28',
-		  	// toDate : '2016-11-30',
+		  	// siteId : 347,
+		  	// fromDate : '2017-01-27',
+		  	// toDate : '2017-02-04',
 		  	propertyData : {
 		  		customer : {
 		  			CustomerPictures : []
@@ -76,7 +77,8 @@ class DetailSite extends Component{
 	  		billingTotalPrice : 0,
 	  		preloadBookInfo : false,
 	  		diffDays : 0,
-	  		access_token : ''
+	  		access_token : '',
+	  		loading : false
 	  	};
 
 	}
@@ -120,6 +122,8 @@ class DetailSite extends Component{
 	}
 
 	_countBilling(data){
+		// console.log(data.PropertyRates)
+		var billingTotalPrice = 0;
 		var groupingRate = _.chain(data.PropertyRates)
 							.groupBy('Rate')
 							.map( (value, key) => {
@@ -135,19 +139,21 @@ class DetailSite extends Component{
 			var dailyBilling = {
 	            'ID': '',
 	            'Memo': memo,
-	            'DailyRate ' : key.rate,
+	            'DailyRate' : key.rate,
 	            'Rate' : key.rate * key.date.length,
 	            'Type' : 'daily'
 	        };
 
 	        items.push(dailyBilling);
+	        billingTotalPrice += key.rate * key.date.length;
+	        // console.log(billingTotalPrice)
 		})
 		
 		var timeDiff = Math.abs(new Date(this.state.toDate).getTime() - new Date(this.state.fromDate).getTime())
 
 		this.setState({
         	billingItems : items,
-        	billingTotalPrice : items[0].Rate,
+        	billingTotalPrice : billingTotalPrice,
         	diffDays : Math.ceil(timeDiff / (1000 * 3600 * 24))
         });
 
@@ -334,11 +340,13 @@ class DetailSite extends Component{
 			if (action === DatePickerAndroid.dismissedAction) {
 				var defaultDate = new Date(options.date)
 				// newState[stateKey + 'Text'] = 'dismissed';
-				newState[stateKey + 'Text'] = defaultDate.getFullYear() + '-' + parseInt(defaultDate.getMonth()+1) + '-' + defaultDate.getDate();
+				// newState[stateKey + 'Text'] = defaultDate.getFullYear() + '-' + parseInt(defaultDate.getMonth()+1) + '-' + defaultDate.getDate();
+				newState[stateKey + 'Text'] = moment(defaultDate).format('YYYY-MM-DD');
 			} else {
 				var date = new Date(year, month, day);
-				newState[stateKey + 'Text'] = date.toLocaleDateString();
-				newState[stateKey + 'Text'] = date.getFullYear() + '-'+ parseInt(date.getMonth()+1) + '-' + date.getDate();
+				// newState[stateKey + 'Text'] = date.toLocaleDateString();
+				// newState[stateKey + 'Text'] = date.getFullYear() + '-'+ parseInt(date.getMonth()+1) + '-' + date.getDate();
+				newState[stateKey + 'Text'] = moment(date).format('YYYY-MM-DD');
 				newState[stateKey + 'Date'] = date;
 				
 				if(stateKey == 'arrival'){
@@ -350,6 +358,8 @@ class DetailSite extends Component{
 						maxDate : date
 					})
 				}
+				this.refs.arrivalDate.blur();
+				this.refs.departureDate.blur();
 				this.onDateChange();
 			}
 
@@ -408,9 +418,11 @@ class DetailSite extends Component{
     }
 
     _addAmenities(amenitiesID){
-    	// console.log(this.state.billingItems)
+    	// console.log(this.state.PropertyAmenities)
+    	
     	var amenityIndex = _.findLastIndex(this.state.PropertyAmenities, { ID : amenitiesID})
-
+    	// console.log(this.state.billingItems)
+    	// console.log(this.state.PropertyAmenities[amenityIndex].Rate)
     	var billingIndex = _.findLastIndex(this.state.billingItems, { ID : amenitiesID})
 
 
@@ -422,10 +434,11 @@ class DetailSite extends Component{
     		})
     		this.state.billingItems.splice(billingIndex, 1)
     	}else{
+    		this.state.PropertyAmenities[amenityIndex]['type'] = 'amenities';
     		this.state.billingItems.push(this.state.PropertyAmenities[amenityIndex]);
 
     		var rate = this.state.PropertyAmenities[amenityIndex].Rate * this.state.diffDays;
-
+    		// console.log(this.state.diffDays)
     		this.setState({
     			billingTotalPrice : this.state.billingTotalPrice + rate
     		})
@@ -452,14 +465,14 @@ class DetailSite extends Component{
     					return(
 			    			<View style={styles.bookingDetailItem} key={index}>
 			    				<Text style={styles.bookingDetailItemsTitle}>{key.Memo}</Text>
-			    				<Text style={styles.bookingDetailItemsRate}>${key.Rate}.00</Text>
+			    				<Text style={styles.bookingDetailItemsRate}>$ {key.Rate}.00</Text>
 			    			</View>
 			    		)	
     				}else{
     					return(
     						<View style={styles.bookingDetailItem} key={index}>
-			    				<Text style={styles.bookingDetailItemsTitle}>{key.Memo}</Text>
-			    				<Text style={styles.bookingDetailItemsRate}>${parseInt(key.Rate*this.state.diffDays)}.00</Text>
+			    				<Text style={styles.bookingDetailItemsTitle}>{key.Memo} - {this.state.diffDays} day(s) x $ {key.Rate}.00</Text>
+			    				<Text style={styles.bookingDetailItemsRate}>$ {parseInt(key.Rate*this.state.diffDays)}.00</Text>
 			    			</View>
     					)
     				}
@@ -524,7 +537,7 @@ class DetailSite extends Component{
 				<View style={styles.detailBox}>
 					<View style={styles.detailBoxHeader}>
 						<Text style={[styleVar.size.h4, styles.titleSection]}>
-							Addasdasd available amenities below if you needed 
+							available amenities below if you needed 
 						</Text>
 					</View>
 					{ this.getAmenityList() }
@@ -616,7 +629,10 @@ class DetailSite extends Component{
 	}
 
 	_bookProcess(){
-		// console.log(this.state.siteId, this.state.fromDate, this.state.toDate)
+		var arrAmenities = _.pluck(_.where(this.state.billingItems, { type: 'amenities' }), 'ID')
+		this.setState({
+			loading : true
+		});
 		var request = new Request(CONSTANT.API_URL+'request/save', {
 			method : 'POST',
 			headers : {
@@ -626,7 +642,8 @@ class DetailSite extends Component{
 			body : JSON.stringify({
 				PropertyID : this.state.siteId,
 				FromDate : this.state.fromDate,
-				ToDate : this.state.toDate
+				ToDate : this.state.toDate,
+				ChosenAmenities : arrAmenities
 			})
 		})
 
@@ -635,7 +652,10 @@ class DetailSite extends Component{
 				return response.json();
 			})
 			.then((response) => {
-				console.log(response)
+				// console.log(response)
+				this.setState({
+					loading : false
+				});
 				if(response.Status == 409){
 					alert("This site is already booked, please change your date")
 				}else{
@@ -652,12 +672,24 @@ class DetailSite extends Component{
 			})
 			.catch((err) => {
 				console.log(err)
+				this.setState({
+					loading : false
+				});
 				alert('Booking Error, please check your internet connection');
 			})
 	}
 
 	_bookSuccess(){
-		this.props.replaceRoute(Routes.link('transactionList'));
+		var sceneConfig = Navigator.SceneConfigs.FloatFromBottom;
+		sceneConfig.gestures.pop.disabled = true;
+    	
+
+    	this.props.toRoute({
+			name : 'myBooking',
+			component : require('./myBooking'),
+    		sceneConfig : sceneConfig
+		})
+		// this.props.replaceRoute(Routes.link('transactionList'));
 	}
 
 	preloadBook(status){
@@ -688,7 +720,7 @@ class DetailSite extends Component{
 					<Text style={[styles.headTotalPrice, {color: this.state.headerColor, fontFamily : 'gothic'}]}>Total Price : ${this.state.billingTotalPrice}.00</Text>
 				</View>
 				
-
+				<ModalLoading viewModal={this.state.loading}/>
 				<ScrollTabView
 					renderTabBar={() => <DefaultTabBar style={styles.scrollbarWrapper}/>}
 					locked={true}
@@ -725,231 +757,6 @@ class DetailSite extends Component{
 	}
 }
 
-// const styles=StyleSheet.create({
-// 	containerHome : {
-// 		flex: 1,
-// 		backgroundColor : '#FFFFFF',
-// 	},
-// 	headerModal : {
-// 		flexDirection: 'row',
-// 		justifyContent : 'space-between',
-// 		alignItems : 'center',
-// 		height : 60,
-// 		top: 0,
-// 		left: 0,
-// 		bottom: 0,
-// 		right: 0,
-// 		paddingLeft : 10,
-// 		paddingRight : 20,
-// 		position : 'absolute',
-// 		zIndex : 2,
-// 		backgroundColor : styleVar.colors.primary,
-// 		elevation :5,
-// 	},
-// 	containerContent : {
-// 		flex:1,
-// 		bottom:0,
-// 		marginTop:60
-// 	},
-// 	contentWrapper : {
-// 		backgroundColor : '#FFF',
-// 	},
-// 	mapWrapper : {
-// 		padding : 20
-// 	},
-// 	map : {
-// 		left : 0,
-// 		right : 0,
-// 		height : 300,
-// 		top: 0,
-// 		bottom : 0
-// 	},
-// 	calloutContent : {
-// 		position:'absolute',
-// 		top: 40,
-// 		left : 40,
-// 		right : 40,
-// 		elevation : 1,
-// 		borderRadius : 3,
-// 		padding : 7,
-// 		backgroundColor : '#FFFF',
-// 		flex:1,
-// 		flexDirection : 'row',
-// 		justifyContent : 'center',
-// 	},
-// 	scrollbarWrapper : {
-// 		backgroundColor : styleVar.colors.greySecondary,
-// 		borderTopWidth : 0.5,
-// 		borderTopColor : styleVar.colors.greyDark
-// 	},
-// 	scrollbarView : {
-// 	},
-// 	propertyImage : {
-// 		left : 0,
-// 		right: 0,
-// 		top: 0,
-// 		width : screenWidth,
-// 		height : 200,
-// 		resizeMode : 'cover',
-// 	},
-// 	scrollView : {
-// 		flex : 1,
-// 		left : 0,
-// 		right: 0,
-// 		top:0,
-// 		bottom:0
-// 	},
-// 	siteAddress : {
-// 		color : styleVar.colors.primary,
-// 		marginTop: 20,
-// 		marginLeft: 20,
-// 		paddingLeft : 20,
-// 		paddingRight : 20,
-// 		paddingTop : 20,
-// 		paddingBottom : 5,
-// 	},
-// 	siteLocation : {
-// 		flex : 1,
-// 		flexDirection :'row',
-// 		paddingHorizontal : 20,
-// 		marginBottom : 20
-// 	},
-// 	siteLocationTitle : {
-// 		color:styleVar.colors.greyDark, 
-// 		fontFamily: 'gothic',
-// 		lineHeight : 5
-// 	},
-// 	borderTB : {
-// 		borderBottomColor : styleVar.colors.greyDark,
-// 		borderBottomWidth : 0.3,
-// 		borderTopColor : styleVar.colors.greyDark,
-// 		borderTopWidth : 0.3,
-// 	},
-// 	hostedWrapper : {
-// 		padding : 20
-// 	},
-// 	hostedImage : {
-// 		height : 40,
-// 		width : 40,
-// 		paddingHorizontal : 20,
-// 	},
-// 	amenitiesWrapper : {
-// 		alignItems : 'center',
-// 		justifyContent : 'space-between',
-// 		flexDirection : 'column',
-// 		paddingHorizontal : 10,
-// 		paddingTop: 10,
-// 		borderBottomColor : styleVar.colors.greyDark,
-// 		borderBottomWidth : 0.3,
-// 		borderTopColor : styleVar.colors.greyDark,
-// 		borderTopWidth : 0.3,
-// 		justifyContent:  'space-between'
-// 	},
-// 	amenitiesIcon : {
-// 		width : 30,
-// 		height : 30,
-// 		tintColor : styleVar.colors.greyDark
-// 	},
-// 	amenitiesCount : {
-// 		color : '#000',
-// 		fontFamily : 'gothic',
-// 		fontSize : 25
-// 	},
-// 	amenitiesItem : {
-// 		left:0,
-// 		right: 0,
-// 		padding: 10,
-// 		width: screenWidth-20,
-// 		flex: 1,
-// 		flexDirection: 'row',
-// 		borderColor: styleVar.colors.greySecondary,
-// 		borderStyle: 'solid',
-// 		// backgroundColor: '#FFFFFF',
-// 		borderWidth: 1,
-// 		elevation :1,
-// 		marginBottom: 10,
-// 		justifyContent:  'space-between'
-// 	},
-// 	infoWrapper : {
-// 		flexDirection : 'row',
-// 		justifyContent : 'space-between',
-// 		paddingVertical : 10,
-// 		borderBottomWidth : 0.3,
-// 		borderBottomColor : styleVar.colors.greyDark
-// 	},
-// 	infoItem : {
-// 		fontFamily : 'gothic',
-// 		fontSize : 14
-// 	},
-// 	infoDetail : {
-// 		fontFamily : 'gothic',
-// 		color : styleVar.colors.greySecondary
-// 	},
-// 	siteDescWrapper : {
-// 		flex : 1,
-// 		flexWrap : 'wrap'
-// 	},
-// 	dateWrapper : {
-// 		backgroundColor : '#CCC',
-// 		padding : 20
-// 	},
-// 	dateRow : {
-// 		flex : 1,
-// 		flexDirection : 'row',
-// 		left : 0,
-// 		right : 0
-// 	},
-// 	imageDate : {
-// 		height : 30,
-// 		width : 30,
-// 		marginRight : 20,
-// 		alignSelf : 'center'
-// 	},
-// 	separator : {
-// 		marginVertical : 10,
-// 		height : 0.5,
-// 		backgroundColor : styleVar.colors.greyDark
-// 	},
-// 	buttonCenter : {
-// 		alignSelf : 'center',
-// 		borderWidth : 1,
-// 		flexDirection : 'row',
-// 		borderColor : styleVar.colors.greyDark,
-// 		alignItems : 'center',
-// 		height : 40,
-// 		paddingHorizontal : 10,
-// 		marginTop : 20
-// 	},
-// 	buttonImage : {
-// 		width : 20,
-// 		height : 20,
-// 		marginRight : 10
-// 	},
-// 	searchForm : {
-// 		backgroundColor : styleVar.colors.greySecondary,
-// 		flex : 1,
-// 		padding : 20,
-// 		left : 0,
-// 		right : 0,
-// 		top : 0,
-// 		flexDirection :'row',
-// 		alignItems : 'flex-start',
-// 		justifyContent : 'space-around'
-// 	},
-// 	inputStyle : {
-// 		fontFamily : 'gothic',
-// 		padding: 0,
-// 		fontSize : 18
-// 	},
-// 	carouselItem : {
-// 		width: screenWidth,
-// 	    flex: 1,
-// 	    justifyContent: 'center',
-// 	    alignItems: 'center',
-// 	    backgroundColor: 'transparent',
-// 	}
-// })
-	
 DetailSite.PropTypes = PropTypes;
 
 module.exports = DetailSite;

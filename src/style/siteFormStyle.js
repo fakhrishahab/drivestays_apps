@@ -190,9 +190,6 @@ module.exports = {
 		right : 0,
 		top: 0,
 		bottom : 0,
-		borderStyle : 'solid',
-		borderColor : 'red',
-		borderWidth : 1,
 		flex:0,
 		width : screenWidth - 20,
 		flexWrap : 'wrap',
@@ -205,11 +202,11 @@ module.exports = {
 		width : screenWidth / 2 - 15 ,
 		alignItems : 'center',
 		justifyContent : 'center',
-		backgroundColor : styleVar.colors.greySecondary
+		backgroundColor : styleVar.colors.greySecondary,
 	},
 	imageFlex : {
 		height : screenWidth / 2 - 15,
 		width : screenWidth / 2 - 15,
-		marginBottom : 8
+		marginBottom : 10
 	}
 }

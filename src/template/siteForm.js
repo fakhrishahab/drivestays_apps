@@ -481,7 +481,6 @@ class SiteForm extends Component{
 				return response.json();
 			})
 			.then((response) => {
-				console.log(response.Data)
 				this.setState({
 					siteInputAddress1 : response.Data.AddressLine1,
 					siteInputAddress2 : (response.Data.AddressLine2) ? response.Data.AddressLine2 : '',
@@ -2368,35 +2367,157 @@ class SiteForm extends Component{
 
     			this.setState({
     				avatarSource : source,
-    				// preloadSavePictures : true
+    				preloadSavePictures : true
     			})
 
-    			console.log(photo)
-
-    			// var newPhoto = {
-    			// 	ID : 199,
-    			// 	Path : 
-    			// 	Memo
-    			// 	Profile
-    			// 	PropertyID
-    			// };
-
-    			// this._doUploadPicture(photo);
+    			this._doUploadPicture(photo);
     		}
     	})
+	}
+
+	_doUploadPicture(uri){
+		let formdata = new FormData();
+
+		formdata.append('Memo', '');
+		formdata.append('PropertyID', this.state.siteID);
+		formdata.append('ThePicture', uri);
+
+		var request = new Request(CONSTANT.API_URL+'propertypicture/add', {
+			method : 'POST',
+			headers : {
+				'Authorization' : this.state.access_token,
+				'Accept' : 'application/json',
+				'Content-Type' : 'multipart/form-data'
+			},
+			enctype : 'multipart/form-data',
+			processData : false,
+			contentType : false,
+			body : formdata
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				var dataPicture = {
+					ID : response.Data[0],
+					Path : response.Data[1],
+					Memo : '',
+					Profile : false,
+					PropertyID : this.state.siteID
+				};
+
+				this.state.propertyPictures.push(dataPicture);
+
+				this.setState({
+    				preloadSavePictures : false
+    			});
+			})
+			.catch((err) => {
+				console.log('error', err);
+				this.setState({
+    				preloadSavePictures : false
+    			});
+			})
 	}
 
 	renderPropertyPictures(propertyPictures){
 		return(
 			propertyPictures.map((key, index) => {
-				console.log(CONSTANT.WEB_URL+key.Path);
 				return(
 					<TouchableWithoutFeedback key={index}>
-						<Image source={{uri : CONSTANT.WEB_URL+key.Path}} style={styles.imageFlex}/>
+						<View style={styles.imageFlex}>
+							<Image style={{resizeMode : 'cover', flex:1,}} source={{uri : CONSTANT.WEB_URL+key.Path}}/>
+							<View style={styles.imageButtonWrapper}>
+								<Icon name="star" size={25} color={(key.Profile == true) ? styleVar.colors.secondary : '#FFF'} onPress={ ()=> this.setDefaultPicture(key.ID, index)} style={styles.imageButton}/>
+								<Icon name="delete" size={25} color="#FFF" onPress={ ()=> this.deletePropertyPicture(key.ID, index)} style={styles.imageButton}/>
+							</View>
+						</View>
 					</TouchableWithoutFeedback>
 				)
 			})
 		)
+	}
+
+	setDefaultPicture(id, index){
+		this.setState({
+			preloadSavePictures : true
+		});
+		var request = new Request(CONSTANT.API_URL+'propertyPicture/makeprofile/'+id, {
+			method : 'POST',
+			headers : {
+				'Authorization' : this.state.access_token
+			}
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				this.state.propertyPictures.forEach(function(obj){
+					if(obj.ID != id){
+						obj.Profile = false;
+					}else{
+						obj.Profile = true;
+					}
+				})
+
+				this.setState({
+					preloadSavePictures : false
+				});
+			})
+			.catch((err) => {
+				console.log('error',err);
+				this.setState({
+					preloadSavePictures : false
+				});
+			})
+	}
+
+	deletePropertyPicture(id, index){
+
+		Alert.alert(
+			'Warning',
+			'Are you sure want to delete this picture?',
+			[
+				{ text : 'Sure', onPress : () => this._doDeletePropertyPicture(id, index)},
+				{ text : 'No', onPress : () => console.log('cancel delete') }
+			]
+		);
+	}
+
+	_doDeletePropertyPicture(id, index){
+		this.setState({
+			preloadSavePictures : true
+		});
+
+		var request = new Request(CONSTANT.API_URL+'propertypicture/delete/'+id, {
+			method : 'GET',
+			headers : {
+				'Authorization' : this.state.access_token
+			}
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				this.state.propertyPictures.splice(index, 1)
+
+				this.setState({
+					preloadSavePictures : false,
+					propertyPictures : this.state.propertyPictures
+				});
+			})
+			.catch((err) => {
+				console.log('error', err);
+				this.setState({
+					preloadSavePictures : false,
+				});
+			})
 	}
 
 	handleChangeTab({i, ref, from}){
@@ -2528,11 +2649,20 @@ class SiteForm extends Component{
 
 								{this.renderPropertyPictures(this.state.propertyPictures)}
 								
-								<TouchableWithoutFeedback onPress={this.uploadPicture.bind(this)}>
-									<View style={styles.imageFlexWrapper}>
-										<Icon name='add-a-photo' size={50} color={styleVar.colors.greyDark}/>
-									</View>
-								</TouchableWithoutFeedback>
+								{
+									(this.state.propertyPictures.length < 5) ?
+
+									<TouchableWithoutFeedback onPress={this.uploadPicture.bind(this)}>
+										<View style={styles.imageFlexWrapper}>
+											<Icon name='add-a-photo' size={50} color={styleVar.colors.greyDark}/>
+										</View>
+									</TouchableWithoutFeedback>	
+
+									: 
+
+									false
+								}
+								
 							</View>
 							
 							{

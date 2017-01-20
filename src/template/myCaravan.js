@@ -208,7 +208,7 @@ class MyCaravan extends Component{
 					{
 						(data.VehiclePictures.length >= 1) ?
 
-						<Image source={{ uri : CONSTANT.WEB_URL+data.VehiclePictures[0].Path }} style={styles.requestImage}/>
+						<Image source={{ uri : CONSTANT.WEB_URL+_.where(data.VehiclePictures, {Profile : true})[0].Path }} style={styles.requestImage}/>
 
 						:
 

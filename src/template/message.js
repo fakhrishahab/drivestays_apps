@@ -191,7 +191,7 @@ class Message extends Component{
 			},
     		sceneConfig : sceneConfig
 		})  
-    	console.log('test')
+    	// console.log('test')
     }
 
 	renderMessageList(){

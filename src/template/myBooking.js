@@ -45,6 +45,7 @@ class MyBooking extends Component{
 	  	this.state = {
 	  		statusTypeID : 1,
 	  		access_token : '',
+	  		initialTab : (this.props.data) ? this.props.data.initialTab : 0,
 	  		renderPlaceholderOnly : true,
 	  		preloadRequest : true,
 	  		preloadSubmitted : false,
@@ -96,11 +97,20 @@ class MyBooking extends Component{
     	AsyncStorage.getItem('ACCESS_TOKEN').then((value) => {
     		this.setState({access_token : value})
 
-    		this._getRequestSubmited(this.state.statusTypeID);
+    		if(this.state.initialTab != 0){
+    			if(this.state.initialTab > 3){
+    				this._getRequestSubmitted(this.state.initialTab + 3);	
+    			}else{
+    				this._getRequestSubmitted(this.state.initialTab + 1);
+    			}
+    		}else{
+    			this._getRequestSubmitted(this.state.statusTypeID);
+    		}
+    		
     	})
     }
 
-    _getRequestSubmited(id){
+    _getRequestSubmitted(id){
     	// console.log('status id', id)
     	this.setState({
     		requestData : '',
@@ -119,6 +129,7 @@ class MyBooking extends Component{
     			return response.json();
     		})
     		.then((response) => {
+    			console.log(response);
     			this.setState({
     				requestData : response.Data,
     				preloadRequest : false
@@ -177,7 +188,7 @@ class MyBooking extends Component{
 
 					return(
 						<View style={styles.requestItemWrapper} key={index}>
-							<Text style={[styles.requestItemName, styleVar.fontGothic]}>You</Text>
+							<Text style={[styles.requestItemName, styleVar.fontGothic]}>{(key.Name) ? key.Name : key.PropertyAddressLine1}</Text>
 							<View style={styles.requestItemSiteWrapper}>
 								{
 									(key.MainPropertyPicture) ? 
@@ -191,6 +202,7 @@ class MyBooking extends Component{
 								
 								<View style={styles.requestItemDescWrapper}>
 									<Text style={[styles.itemDescTitle, styleVar.fontGothic]}>{key.PropertyAddressLine1}</Text>
+									<Text style={[styleVar.fontGothic]}>Owner : {key.OwnerFirstName} {(key.OwnerLastName) ? key.OwnerLastName : ''}</Text>
 									<Text style={[styleVar.fontGothic]}>Booking Date {moment(key.Request.Date).format('YYYY-MM-DD')}</Text>
 									<Text style={[styleVar.fontGothic]}>From {moment(key.Request.FromDate).format('YYYY-MM-DD')} To {moment(key.Request.ToDate).format('YYYY-MM-DD')}</Text>
 									<Text style={[styleVar.fontGothic]}>Total Price : $ {total}.00</Text>
@@ -246,7 +258,34 @@ class MyBooking extends Component{
 					</View>
 				)
 			break;
+			case 4 : 
+				return(
+					<View style={styles.requestItemActionButton}>
+						<TouchableHighlight onPress={() => this._viewInvoice(request.ID, index)}>
+							<View style={[styles.requestButton, styles.buttonPrimary]}>
+								<Text style={{color: '#FFF'}}>View Invoice</Text>
+							</View>
+						</TouchableHighlight>
+					</View>
+				)
+			break;
 		}
+	}
+
+	_viewInvoice(requestID, index){
+		var sceneConfig = Navigator.SceneConfigs.FloatFromBottom;
+    	sceneConfig.gestures.pop.disabled = true;
+    	
+
+    	this.props.toRoute({
+			name : 'invoice',
+			component : require('./invoice'),
+			data : {
+				RequestID : requestID,
+				statusPaid : true				
+			},
+    		sceneConfig : sceneConfig
+		})
 	}
 
 	_cancelRequest(requestID, index){
@@ -331,7 +370,7 @@ class MyBooking extends Component{
 					statusTypeID : i+1
 				})
 
-				this._getRequestSubmited(i+1)
+				this._getRequestSubmitted(i+1)
 				break;
 			case 4 :
 			case 5 : 
@@ -341,7 +380,7 @@ class MyBooking extends Component{
 					statusTypeID : i+3
 				})
 
-				this._getRequestSubmited(i+3)
+				this._getRequestSubmitted(i+3)
 				break;
 		};
 	}
@@ -377,7 +416,7 @@ class MyBooking extends Component{
 			    	<ScrollTabView
 						renderTabBar={() => <ScrollableTabBar style={styles.scrollbarWrapper}/>}
 						locked={false}
-						initialPage={0}
+						initialPage={this.state.initialTab}
 						ref="scrollTab"
 						tabBarPosition="top"
 						tabBarActiveTextColor={styleVar.colors.primary}

@@ -165,7 +165,7 @@ class MySite extends Component{
 					{
 						(data.PropertyPictures.length >= 1) ?
 
-						<Image source={{ uri : CONSTANT.WEB_URL+data.PropertyPictures[0].Path }} style={styles.requestImage}/>
+						<Image source={{ uri : CONSTANT.WEB_URL+ _.where(data.PropertyPictures, {Profile : true })[0].Path }} style={styles.requestImage}/>
 
 						:
 
@@ -248,7 +248,7 @@ class MySite extends Component{
 				return response.json();
 			})
 			.then((response) => {
-				console.log(response);
+				// console.log(response);
 				this.setState({
 					dataSource : this.state.dataSource.cloneWithRows(dataSiteArr),
 					preloadSiteShow : false

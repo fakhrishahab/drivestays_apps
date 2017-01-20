@@ -62,20 +62,21 @@ module.exports = {
 		marginBottom : 15,
 	},
 	uploadContainerTitle : {
-		padding: 20,
+		padding: 10,
 		borderStyle : 'solid',
 		borderBottomWidth : 0.3,
 		borderBottomColor : styleVar.colors.greyDark
 	},
 	uploadContainerContent : {
-		padding : 20,
+		padding : 10,
 		flexDirection : 'row',
 		alignItems : 'flex-start',
+	    justifyContent: 'space-between',
 		flexWrap:'wrap'
 	},
 	uploadTrigger : {
-		width : 100,
-		height : 100,
+		width : screenWidth / 2 - 25,
+		height : screenWidth / 2 - 25,
 		borderStyle : 'dashed',
 		borderWidth : 1,
 		borderColor : styleVar.colors.greyDark,
@@ -83,14 +84,12 @@ module.exports = {
 		justifyContent : 'center'
 	},
 	uploadedImageWrapper : {
-		height : 100,
-		width : 100,
-		marginRight : 10,
+		height : screenWidth / 2 - 25,
+		width : screenWidth / 2 - 25,
 		marginBottom : 10
 	},
 	uploadedImage : {
-		height : 100,
-		width : 100,
+		flex:1,
 	},
 	buttonSave : {
 		left:0,
