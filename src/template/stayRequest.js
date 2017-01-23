@@ -147,7 +147,7 @@ class StayRequest extends Component{
 				return response.json();
 			})
 			.then((response) => {
-				// console.log(response);
+				// console.log(response.Data);
 				this.setState({
 					preloadRequest : false,
 					stayRequestData : response.Data
@@ -206,13 +206,7 @@ class StayRequest extends Component{
 									</View>
 								</TouchableHighlight>
 							</View>
-							<View style={styles.requestItemActionButton}>
-								<TouchableHighlight>
-									<View style={[styles.requestButton, styles.buttonPrimary]}>
-										<Text style={{color: '#FFF'}}>Cancel Order</Text>
-									</View>
-								</TouchableHighlight>
-							</View>
+							{this.renderButton(key.Request, index)}
 							
 						</View>
     				)
@@ -229,6 +223,186 @@ class StayRequest extends Component{
 			)
 		}
     	
+    }
+
+    renderButton(request, index){
+    	console.log(request.StatusTypeID)
+    	switch(request.StatusTypeID){
+    		case 1:
+    			return(
+		    		<View style={styles.requestItemActionButton}>
+		    			<TouchableHighlight onPress={() => this._acceptRequest(request.ID, index)}>
+							<View style={[styles.requestButton, styles.buttonSecondary]}>
+								<Text style={{color: '#FFF'}}>Accept Request</Text>
+							</View>
+						</TouchableHighlight>
+						<TouchableHighlight onPress={() => this._declineRequest(request.ID, index)}>
+							<View style={[styles.requestButton, styles.buttonPrimary]}>
+								<Text style={{color: '#FFF'}}>Decline Request</Text>
+							</View>
+						</TouchableHighlight>
+					</View>
+		    	)
+    		break;
+    		case 2 :
+	    		return(
+			    		<View style={styles.requestItemActionButton}>
+							<TouchableHighlight onPress={() => this._cancelRequest(request.ID, index)}>
+								<View style={[styles.requestButton, styles.buttonPrimary]}>
+									<Text style={{color: '#FFF'}}>Cancel Request</Text>
+								</View>
+							</TouchableHighlight>
+						</View>
+			    	)
+    		break;
+    		case 4 :
+	    		return(
+			    		<View style={styles.requestItemActionButton}>
+							<TouchableHighlight onPress={() => this._cancelRequest(request.ID, index)}>
+								<View style={[styles.requestButton, styles.buttonPrimary]}>
+									<Text style={{color: '#FFF'}}>Cancel Request</Text>
+								</View>
+							</TouchableHighlight>
+						</View>
+			    	)
+    		break;
+    	}
+    }
+
+    _acceptRequest(requestID, index){
+    	Alert.alert(
+			'Attention',
+			'Are you sure want to accept this request?',
+			[
+				{text : 'Sure', onPress: () => this._doAcceptRequest(requestID, index)},
+				{text : 'No', onPress: () => console.log('No pressed')}
+			]
+		);
+    }
+
+    _doAcceptRequest(id, index){
+    	this.setState({
+			loading : true
+		});
+
+		var request = new Request(CONSTANT.API_URL+'request/accept/'+id, {
+			method : 'GET',
+			headers : {
+				'Content-Type' : 'application/json',
+				'Authorization' : this.state.access_token
+			}
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				console.log(response);
+				this.state.stayRequestData.splice(index, 1);
+
+				this.setState({
+					loading : false,
+		    		stayRequestData : this.state.stayRequestData
+				});
+			})
+			.catch((err) => {
+				console.log('error',err);
+				this.setState({
+					loading : false
+				});
+
+			})
+    }
+
+    _declineRequest(requestID, index){
+    	Alert.alert(
+			'Attention',
+			'Are you sure want to decline this request?',
+			[
+				{text : 'Sure', onPress: () => this._doDeclineRequest(requestID, index)},
+				{text : 'No', onPress: () => console.log('No pressed')}
+			]
+		);
+    }
+
+    _doDeclineRequest(id, index){
+    	this.setState({
+			loading : true
+		});
+
+		var request = new Request(CONSTANT.API_URL+'request/decline/'+id, {
+			method : 'GET',
+			headers : {
+				'Content-Type' : 'application/json',
+				'Authorization' : this.state.access_token
+			}
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				console.log(response);
+				this.state.stayRequestData.splice(index, 1);
+
+				this.setState({
+					loading : false,
+		    		stayRequestData : this.state.stayRequestData
+				});
+			})
+			.catch((err) => {
+				console.log('error',err);
+				this.setState({
+					loading : false
+				});
+			})
+    }
+
+    _cancelRequest(requestID, index){
+    	Alert.alert(
+			'Attention',
+			'Are you sure want to cancel this request?',
+			[
+				{text : 'Sure', onPress: () => this._doCancelRequest(requestID, index)},
+				{text : 'No', onPress: () => console.log('No pressed')}
+			]
+		);
+    }
+
+    _doCancelRequest(id, index){
+    	this.setState({
+			loading : true
+		});
+
+		var request = new Request(CONSTANT.API_URL+'request/cancelbyowner/'+id, {
+			method : 'GET',
+			headers : {
+				'Content-Type' : 'application/json',
+				'Authorization' : this.state.access_token
+			}
+		});
+
+		fetch(request)
+			.then((response) => {
+				return response.json();
+			})
+			.then((response) => {
+				console.log(response);
+				this.state.stayRequestData.splice(index, 1);
+
+				this.setState({
+					loading : false,
+		    		stayRequestData : this.state.stayRequestData
+				});
+			})
+			.catch((err) => {
+				console.log('error',err);
+				this.setState({
+					loading : false
+				});
+			})
     }
 
     handleChangeTab({i, ref, from}){

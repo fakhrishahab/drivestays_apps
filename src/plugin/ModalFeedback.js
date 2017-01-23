@@ -22,21 +22,27 @@ class ModalFeedback extends Component{
 	
 		this.state = {
 			showModal : false,
-			notificationText : ''
+			notificationText : '',
+			modalStatus : '',
+			textButton : ''
 		};
 	}
 
 	componentDidMount(){
 		this.setState({
 			showModal : this.props.viewModal,
-			notificationText : this.props.textModal
+			notificationText : this.props.textModal,
+			modalStatus : this.props.modalStatus,
+			textButton : this.props.textButton,
 		})
 	}
 
 	componentWillReceiveProps(nextProps){
 		this.setState({
 			showModal : nextProps.viewModal,
-			notificationText : nextProps.textModal
+			notificationText : nextProps.textModal,
+			modalStatus : nextProps.modalStatus,
+			textButton : nextProps.textButton
 		})
 	}
 
@@ -56,11 +62,17 @@ class ModalFeedback extends Component{
 				>
 					<View style={styles.containerModal}>
 						<View style={styles.containerLoading}>
-							<Image source={require('image!confirm')} style={{width : screenWidth / 3, height : screenWidth / 3, marginVertical : 10}} />
+							{
+								(this.state.modalStatus == 'error') ? 
+								<Image source={require('image!notification')} style={{width : screenWidth / 3, height : screenWidth / 3, marginVertical : 10}} />
+								:
+								<Image source={require('image!confirm')} style={{width : screenWidth / 3, height : screenWidth / 3, marginVertical : 10}} />
+							}
+							
 						    <Text style={[styleVar.size.h4, {color : '#000', textAlign : 'center'}]}>{this.state.notificationText}</Text>
 							<TouchableWithoutFeedback onPress={() => this.clickButton()}>
 								<View style={styles.buttonSave}>
-									<Text style={[styleVar.size.h4, {color : '#FFF'}]}>Go To Booking Page</Text>
+									<Text style={[styleVar.size.h4, {color : '#FFF'}]}>{this.state.textButton}</Text>
 								</View>
 							</TouchableWithoutFeedback>
 						</View>

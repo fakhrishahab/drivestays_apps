@@ -424,6 +424,7 @@ class Payment extends Component{
 				<ModalFeedback 
 					viewModal={this.state.showModalFeedback}
 					textModal={this.state.textModalFeedback}
+					textButton="Go To Booking Page"
 					doClickButton={() => this._doClickButton()}/>
 
 				{this.initialLoad(this.state.renderPlaceholderOnly)}
