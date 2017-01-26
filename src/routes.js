@@ -50,6 +50,9 @@ var Routes = module.exports = {
 			case 'messageThread' :
 				target = require('./template/messageThread');
 				break;
+			case 'forgotPassword' :
+				target = require('./template/forgotPassword');
+				break;
 		}
 
 		var sceneConfig = Navigator.SceneConfigs.FloatFromBottom;

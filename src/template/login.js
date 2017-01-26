@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {Component, PropTypes} from 'react';
 import {
 	View,
 	Text,
@@ -188,6 +188,17 @@ class Login extends Component{
 		})
 	}
 
+	_forgotPassword(){
+		var sceneConfig = Navigator.SceneConfigs.FloatFromBottom;
+		sceneConfig.gestures.pop.disabled = true;
+
+    	this.props.toRoute({
+			name : 'forgot',
+			component : require('./forgotPassword'),
+    		sceneConfig : sceneConfig
+		})
+	}
+
 	render(){
 		let footerContent = (!this.state.isSignup) ? (
 			<Text style={styles.footerText}>Dont Have an account? <Text style={styles.footerTextAction}>Sign Up.</Text></Text>
@@ -316,6 +327,23 @@ class Login extends Component{
 						{passwordConfirmation}
 
 						{loadingComponent}
+
+						{
+							(!this.state.isSignup) ? 
+
+							<View style={styles.inputWrapper}>
+								<TouchableOpacity onPress={() => this._forgotPassword()}>
+									<View style={{paddingTop : 20, paddingBottom : 10, alignItems : 'flex-end'}}>
+										<Text style={{color : styleVar.colors.primary}}>Forgot Password ?</Text>
+									</View>
+								</TouchableOpacity>
+							</View>
+
+							:
+
+							null
+						}
+						
 
 						<View style={styles.inputWrapper}>
 							<Button text={(this.state.isSignup) ? 'Sign Up' : 'Log In'} onPress={ () => this._submitForm()}/>

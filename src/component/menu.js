@@ -25,7 +25,7 @@ let listMenu = [
         {id : 5, title : 'My Site', target : 'mySite', icon : require('image!icon_13')},
         {id : 6, title : 'My Booking', target : 'myBooking', icon : require('image!icon_34')},
         {id : 7, title : 'Stay Request', target : 'stayRequest', icon : require('image!icon_34')},
-        {id : 8, title : 'Account Payment', target : 'accountPayment', icon : require('image!icon_12')},
+        // {id : 8, title : 'Account Payment', target : 'accountPayment', icon : require('image!icon_12')},
 	],
 	settingMenu = [
         {id : 9, title : 'Account Setting', target : 'accountSetting', icon : require('image!icon_03')},
@@ -119,7 +119,7 @@ class Menu extends Component{
 					        	>
 					        	<View style={styles.menuGroupItem}>
 									<Image source={require('image!icon_05')} style={styles.menuItemImage}/>
-					        		<Text>Log Out</Text>
+					        		<Text style={styles.menuItemName}>Log Out</Text>
 					        	</View>
 			        		</TouchableHighlight>
 						</View>

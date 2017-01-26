@@ -1,0 +1,36 @@
+godaddy
+
+woodsideup.com
+username : 100553279
+password : Android2016
+
+SQL User
+User ID:  Harris
+Password:  Robotis2016!
+
+<connectionStrings>
+	<add 
+		name="TravellersContext" 
+		connectionString="	
+			Server=tcp:drivestays.database.windows.net,1433;
+			Database=DS;
+			User ID=Harris@drivestays;
+			Password=Robotis2016!;
+			Encrypt=True;
+			TrustServerCertificate=False;
+			Connection Timeout=30;" 
+		providerName="System.Data.SqlClient" />
+</connectionStrings>
+
+UDEMY ONLINE COURSE
+username : NewYorkCity@outlook.com
+Password : berlin1
+
+ANDROID SIGNED APK
+alias drivestaysdebugkey
+pass Robotis2016!
+keypass drivestays
+
+GOOGLE ACCOUNT
+user	: TravellersDevelopment
+pass	: Jakarta2016
