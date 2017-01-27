@@ -630,6 +630,13 @@ class DetailSite extends Component{
 
 	_bookProcess(){
 		var arrAmenities = _.pluck(_.where(this.state.billingItems, { type: 'amenities' }), 'ID')
+		var data = {
+				PropertyID : this.state.siteId,
+				FromDate : this.state.fromDate,
+				ToDate : this.state.toDate,
+				ChosenAmenities : arrAmenities
+			};
+			console.log(data)
 		this.setState({
 			loading : true
 		});
@@ -643,7 +650,7 @@ class DetailSite extends Component{
 				PropertyID : this.state.siteId,
 				FromDate : this.state.fromDate,
 				ToDate : this.state.toDate,
-				ChosenAmenities : arrAmenities
+				ChosenAmenities : (arrAmenities) ? arrAmenities : []
 			})
 		})
 
@@ -652,7 +659,7 @@ class DetailSite extends Component{
 				return response.json();
 			})
 			.then((response) => {
-				// console.log(response)
+				console.log(response)
 				this.setState({
 					loading : false
 				});

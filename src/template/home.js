@@ -173,7 +173,8 @@ class Home extends Component{
 					arrivalDate : this.state.arrivalText,
 					departureDate : this.state.departureText
 				},
-	    		sceneConfig : sceneConfig
+	    		sceneConfig : Navigator.SceneConfigs.FloatFromBottom,
+	    		gestures : Navigator.SceneConfigs.FloatFromBottom.gestures
 			})
     	}    	
     }

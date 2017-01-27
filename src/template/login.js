@@ -36,7 +36,7 @@ class Login extends Component{
 			loadingVisible : false
 		};
 
-		this.email = 'fakhri1804@gmail.com';
+		this.email = '';
 		this.password = '';
 		this.passwordConfirmation = '';
 		this.firstName = '';
